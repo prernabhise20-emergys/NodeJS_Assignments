@@ -215,39 +215,40 @@ const getSearchedTasks = async (column, keyword) => {
 // *****************************************************************************
 
 
+const getFilteredTasks = ({ column, keyword, status, dueDate }) => {
+    return new Promise((resolve, reject) => {
+        try {
+            let query;
 
-const getFilteredTasks = async ({ column, keyword, status, dueDate }) => {
-    try {
-        let query = 'SELECT * FROM tasks WHERE 1=1';
-        const values = [];
-        if (column && keyword) {
-            query += ' AND ?? LIKE ?';
-            values.push(column, `%${keyword}%`);
-        }
-        if (status) {
+            if (column && keyword) {
+                query = `SELECT * FROM tasks WHERE 1=1 AND ${column} LIKE '%${keyword}%'`;
+            }
 
-            query += ' AND status = ?';
-            values.push(status);
-        }
-        if (dueDate) {
-            const compare = dueDate === 'overdue' ? '<' : '>';
-            query += ` AND STATUS='INCOMPLETE' AND due_date ${compare} NOW()`;
-        }
-        const data = await new Promise((resolve, reject) => {
-            db.query(query, values, (error, results) => {
+            if (status) {
+                query = `SELECT * FROM tasks WHERE 1=1 AND status = '${status}'`;
+            }
+
+            if (dueDate) {
+                const compare = dueDate === 'overdue' ? '<' : '>';
+                query = `SELECT * FROM tasks WHERE 1=1 AND STATUS='INCOMPLETE' AND due_date ${compare} NOW()`;
+            }
+
+            db.query(query, (error, data) => {
                 if (error) {
-                    console.error("Database error", error);
+                    console.error("Error in getFilteredTasks", error);
                     return reject(new Error("Failed to retrieve filtered tasks"));
-                } resolve(results);
+                }
+                resolve(data);
             });
-        });
-        return data;
-    }
-    catch (error) {
-        console.error("Error in getFilteredTasks", error);
-        throw new Error(error.message);
-    }
+
+        } catch (error) {
+            console.error("Error in getFilteredTasks", error);
+            reject(new Error("Failed to retrieve filtered tasks"));
+        }
+    });
 };
+
+
 
 // *****************************************************************************
 
