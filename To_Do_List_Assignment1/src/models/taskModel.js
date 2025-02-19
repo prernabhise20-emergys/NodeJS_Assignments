@@ -5,18 +5,19 @@ const db = require('../db/connection');
 // ********************************************************************
 
 const getTasks = async () => {
-    try{
-    const data = await new Promise((resolve, reject) => {
-        db.query('SELECT *FROM TASKS', (err, result) => {
-            if (err) return reject(err);
-            return resolve(result);
-        })
-    })
-    return data
-    }
-    catch(error){
-        console.error("Error in getTask:", error);
-        throw error;
+
+    try {
+        const data = await new Promise((resolve, reject) => {
+            db.query("SELECT * FROM tasks WHERE is_deleted =FALSE", (error, result) => {
+                if (error) return reject(error);
+                return resolve(result);
+            });
+        });
+
+        return data;
+    } catch (error) {
+        console.error("Error in fetching tasks", error);
+        throw new Error(error.message);
     }
 }
 
@@ -24,20 +25,20 @@ const getTasks = async () => {
 
 
 const getSpecificTask = async (taskId) => {
-try{
-    const data = await new Promise((resolve, reject) => {
-        db.query('SELECT *FROM TASKS WHERE ID=?', [taskId], (err, result) => {
+    try {
+        const data = await new Promise((resolve, reject) => {
+            db.query('SELECT *FROM TASKS WHERE ID=?', [taskId], (err, result) => {
 
-            if (err) return reject(err);
-            return resolve(result);
+                if (err) return reject(err);
+                return resolve(result);
+            })
         })
-    })
-    return data;
-}
-catch(error){
-    console.error("Error in getSpecificTask:", error);
+        return data;
+    }
+    catch (error) {
+        console.error("Error in getSpecificTask:", error);
         throw error;
-}
+    }
 }
 
 // ********************************************************************
@@ -49,16 +50,16 @@ const checkIfTaskExists = async (taskInfo) => {
         const result = await new Promise((resolve, reject) => {
             db.query("SELECT * FROM tasks WHERE title = ?",
                 [title], (error, results) => {
-                if (error) {
-                    console.error("Database query error:", error);
-                    return reject(new Error("Failed to check task in data"));
-                }
-                resolve(results);
-            });
+                    if (error) {
+                        console.error("Database query error:", error);
+                        return reject(new Error("Failed to check task in data"));
+                    }
+                    resolve(results);
+                });
         });
 
         return result.length > 0;
-        
+
     } catch (error) {
         console.error("Error in checkIfTaskExists:", error);
         throw new Error(error.message);
@@ -87,7 +88,7 @@ const createNewTask = async (taskInfo) => {
         return data;
     } catch (error) {
         console.error("Error in createNewTask:", error);
-        throw new Error(error.message); 
+        throw new Error(error.message);
     }
 };
 
@@ -146,20 +147,43 @@ const patchStatus = async ({ status, taskId }) => {
 
 const deleteTask = async (taskId) => {
     try {
+        if (!taskId) {
+            throw new Error("Task ID is required");
+        }
+
+        const taskExists = await new Promise((resolve, reject) => {
+            db.query("SELECT * FROM tasks WHERE id = ?", [taskId], (error, result) => {
+                if (error) {
+                    return reject(error);
+                }
+                if (result.length === 0) {
+                    return reject(new Error("Task not found"));
+                }
+                return resolve(true);
+            });
+        });
+
         const data = await new Promise((resolve, reject) => {
-            db.query("DELETE FROM tasks WHERE id = ?", [taskId], (error, result) => {
-                if (error) return reject(error);
-                return resolve(result);
-            })
-        })
+            db.query("UPDATE tasks SET is_deleted = TRUE WHERE id = ?", 
+                [taskId], 
+                (error, result) => {
+                    if (error) {
+                        return reject(error); 
+                    }
+                    if (result.affectedRows === 0) {
+                        return reject(new Error("Task not found or already deleted"));
+                    }
+                    return resolve(result); 
+                });
+        });
 
         return data;
+    } catch (error) {
+        console.error("Error in soft delete task:", error.message);
+        throw new Error(error.message); 
     }
-    catch (error) {
-        console.error("Error in delete Task", error);
-        throw new Error(error.message);
-    }
-}
+};
+
 
 // *****************************************************************
 
@@ -214,7 +238,6 @@ const getSearchedTasks = async (column, keyword) => {
 
 // *****************************************************************************
 
-
 const getFilteredTasks = ({ column, keyword, status, dueDate }) => {
     return new Promise((resolve, reject) => {
         try {
@@ -247,7 +270,6 @@ const getFilteredTasks = ({ column, keyword, status, dueDate }) => {
         }
     });
 };
-
 
 
 // *****************************************************************************

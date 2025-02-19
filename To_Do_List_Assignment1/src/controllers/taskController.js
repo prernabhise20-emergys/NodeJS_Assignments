@@ -1,15 +1,16 @@
 const TaskModel = require("../models/taskModel");
 const constantDetails = require("../constants/constant")
 
+// ******************************************************************
+
 const getAllTaskDetails = async (req, res) => {
     try {
-        const task = await TaskModel.getTasks();
-        res.status(200).send({
+        const tasks = await TaskModel.getTasks();
+        return res.status(200).send({
             status: constantDetails.SUCCESS.STATUS_CODE,
             message: constantDetails.SUCCESS.MESSAGE,
-            data: task
+            data: tasks
         });
-
     } catch (error) {
         return res.status(500).send({
             status: constantDetails.ERROR.STATUS_CODE,
@@ -18,15 +19,13 @@ const getAllTaskDetails = async (req, res) => {
     }
 };
 
+
+
 // *****************************************************************
 
 const getSpecificTaskDetails = async (req, res) => {
     try {
         const taskId = req.params.id;
-
-        if (!taskId) {
-            return res.send('task id is required');
-        }
         const task = await TaskModel.getSpecificTask(taskId);
         if (task.length === 0) {
             return res.status(404).send({
@@ -82,10 +81,8 @@ const createNewTask = async (req, res) => {
     }
 };
 
-
-
-
 // **************************************************************
+
 const updateTask = async (req, res) => {
     try {
         const { title, description, status } = req.body;
@@ -179,6 +176,32 @@ const deleteTask = async (req, res) => {
 
 // *****************************************************************************
 
+const restoreTask = async (req, res) => {
+    try {
+        const taskId = req.params.id;
+        const restoreTask = await TaskModel.restoreTask(taskId);
+
+        if (restoreTask.affectedRows === 0) {
+            res.status(404).send({
+                status: constantDetails.NOT_FOUND.STATUS_CODE,
+                message: constantDetails.NOT_FOUND.MESSAGE
+            });
+        }
+        return res.status(200).send({
+            status: constantDetails.SUCCESS.STATUS_CODE,
+            message: "Task restored successfully"
+        });
+
+    } catch (error) {
+        return res.status(500).send({
+            status: constantDetails.ERROR.STATUS_CODE,
+            message: constantDetails.ERROR.MESSAGE
+        });
+    }
+};
+
+// *****************************************************************************
+
 const sortingTask = async (req, res) => {
     try {
         const { column, sortByOrder } = req.params;
@@ -241,7 +264,6 @@ const searchTasks = async (req, res) => {
 
 // *********************************************************************************
 
-
 const filterTasks = async (req, res) => {
     try {
         const { column, keyword, status, dueDate } = req.query;
@@ -266,10 +288,12 @@ const filterTasks = async (req, res) => {
 };
 
 // ***********************************************************************************
+
 module.exports = {
     getAllTaskDetails,
     createNewTask,
     updateTask,
+    restoreTask,
     deleteTask,
     getSpecificTaskDetails,
     sortingTask,
