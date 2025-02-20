@@ -3,20 +3,20 @@ const Joi = require('joi');
 const schemas = {
     taskPostSchema: Joi.object({
         title: Joi.string().min(3).max(255).required(),
-        created_date: Joi.date().required(),
+        created_date: Joi.date().optional(),
         created_by: Joi.string().email().required(),
         updated_date: Joi.date().optional(),
         updated_by: Joi.string().email().optional(),
         description: Joi.string().optional(),
         status: Joi.string().optional(),
-        due_date: Joi.date().optional()
+        due_date: Joi.date().required()
     }),
     taskPutSchema: Joi.object({
-        title: Joi.string().min(3).max(255).required(),
+        title: Joi.string().min(3).max(255).optional(),
         created_date: Joi.date(),
         created_by: Joi.string().email(),
         updated_date: Joi.date(),
-        updated_by: Joi.string().email(),
+        updated_by: Joi.string().email().required(),
         description: Joi.string().optional(),
         status: Joi.string().optional(),
         due_date: Joi.date().optional()

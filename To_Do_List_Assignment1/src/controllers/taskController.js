@@ -48,32 +48,30 @@ const getSpecificTaskDetails = async (req, res) => {
 };
 
 // ***********************************************************
-
 const createNewTask = async (req, res) => {
     try {
         const data = req.body;
-        
-        const title = req.body.title;
+        const { title } = data;  
+        const userId = req.user.id; 
 
         const taskExists = await TaskModel.checkIfTaskExists({ title });
 
         if (taskExists) {
-            return res.status(500).send({
+            return res.status(400).send({
                 status: constantDetails.ERROR.STATUS_CODE,
                 message: "Task with similar details already exists.",
             });
         }
 
-        const task = await TaskModel.createNewTask(data);
+        const task = await TaskModel.createNewTask(data, userId);
 
         res.status(201).send({
             status: constantDetails.CREATED.STATUS_CODE,
-            message: constantDetails.CREATED.MESSAGE,
+            message: "Task created successfully.",
             data: task
         });
     } catch (error) {
         console.error("Error in createNewTask:", error);
-
         return res.status(500).send({
             status: constantDetails.ERROR.STATUS_CODE,
             message: error.message || constantDetails.ERROR.MESSAGE,

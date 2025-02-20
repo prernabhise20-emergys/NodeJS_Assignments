@@ -1,6 +1,4 @@
-
 const db = require('../db/connection');
-
 
 // ********************************************************************
 
@@ -23,11 +21,10 @@ const getTasks = async () => {
 
 // ********************************************************************
 
-
 const getSpecificTask = async (taskId) => {
     try {
         const data = await new Promise((resolve, reject) => {
-            db.query('SELECT *FROM TASKS WHERE ID=?', [taskId], (err, result) => {
+            db.query('SELECT *FROM TASKS WHERE IS_DELETED=FALSE AND ID=?', [taskId], (err, result) => {
 
                 if (err) return reject(err);
                 return resolve(result);
@@ -67,29 +64,27 @@ const checkIfTaskExists = async (taskInfo) => {
 };
 // ***************************************************************************
 
+const createNewTask = async (data, userId) => {
+    try{
+    return new Promise((resolve, reject) => {
+        const taskData = { ...data, USER_ID: userId }; 
 
-const createNewTask = async (taskInfo) => {
-    try {
-        const taskDetail = taskInfo;
+        const query = "INSERT INTO TASKS SET ?";  
 
-        const data = await new Promise((resolve, reject) => {
-            const query = "INSERT INTO tasks SET ?";
-            db.query(query, taskDetail, (error, result) => {
-                if (error) {
-                    console.error("Database query error:", error);
-                    return reject(new Error("Failed to insert task into database"));
-                }
-
-                console.log("Task successfully created:", result);
-                return resolve(result);
-            });
+        db.query(query, taskData, (error, result) => {
+            if (error) {
+                console.error("Database insert error:", error);
+                return reject(new Error("Failed to create task"));
+            }
+            console.log("Task created successfully:", result);
+            return resolve(result);
         });
-
-        return data;
-    } catch (error) {
-        console.error("Error in createNewTask:", error);
-        throw new Error(error.message);
-    }
+    });
+}
+catch (error) {
+            console.error("Error in createNewTask:", error);
+            throw new Error(error.message);
+        }
 };
 
 
@@ -262,7 +257,9 @@ const getFilteredTasks = ({ column, keyword, status, dueDate }) => {
                     return reject(new Error("Failed to retrieve filtered tasks"));
                 }
                 resolve(data);
+                return data;
             });
+            
 
         } catch (error) {
             console.error("Error in getFilteredTasks", error);
@@ -270,7 +267,6 @@ const getFilteredTasks = ({ column, keyword, status, dueDate }) => {
         }
     });
 };
-
 
 // *****************************************************************************
 
