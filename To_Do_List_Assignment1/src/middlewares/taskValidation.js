@@ -1,5 +1,5 @@
 const Joi = require('joi');
-
+const toLower=require('../utility/bodyConverter')
 const schemas = {
     taskPostSchema: Joi.object({
         title: Joi.string().min(3).max(255).required(),
@@ -16,7 +16,7 @@ const schemas = {
         created_date: Joi.date(),
         created_by: Joi.string().email(),
         updated_date: Joi.date(),
-        updated_by: Joi.string().email().required(),
+        updated_by: Joi.string().email().optional(),
         description: Joi.string().optional(),
         status: Joi.string().optional(),
         due_date: Joi.date().optional()
@@ -30,23 +30,29 @@ const schemas = {
         description: Joi.string().optional(),
         status: Joi.string().optional(),
         due_date: Joi.date().optional()
+    }),
+    userPostSchema:Joi.object({
+        username: Joi.string().alphanum().min(3).required(),
+        password: Joi.string().min(4).required(),
+        name:Joi.string().min(3).max(30).pattern(/^[a-zA-Z\s]+$/).required(),
+        contact_no:Joi.string().pattern(/^[0-9]{10}$/).required()
+    }),
+    userLoginSchema:Joi.object({
+        username: Joi.string().alphanum().min(3).required(),
+        password: Joi.string().min(4).required()
+    }),
+    userPutMiddleware:Joi.object({
+        username: Joi.string().alphanum().min(3).optional(),
+        password: Joi.string().min(4).optional(),
+        name:Joi.string().min(3).max(30).pattern(/^[a-zA-Z\s]+$/).optional(),
+        contact_no:Joi.string().pattern(/^[0-9]{10}$/).optional()
     })
 };
 
-const convertTOLower = (obj) => {
-    const convertingObj = {};
-    for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
-            convertingObj[key.toLowerCase()] = obj[key];
-        }
-    }
-    return convertingObj;
-};
-
-const taskMiddleware = (schema) => {
+const bodyValidator = (schema) => {
     return (req, res, next) => {
         try {
-            req.body = convertTOLower(req.body);
+            req.body = toLower(req.body);
 
             const { error } = schema.validate(req.body);
             if (error) {
@@ -60,13 +66,19 @@ const taskMiddleware = (schema) => {
     };
 };
 
-const taskPostMiddleware = taskMiddleware(schemas.taskPostSchema);
-const taskPutMiddleware = taskMiddleware(schemas.taskPutSchema);
-const taskPatchMiddleware = taskMiddleware(schemas.taskPatchSchema);
+const taskPostMiddleware = bodyValidator(schemas.taskPostSchema);
+const taskPutMiddleware = bodyValidator(schemas.taskPutSchema);
+const taskPatchMiddleware = bodyValidator(schemas.taskPatchSchema);
+const userPostMiddleware= bodyValidator(schemas.userPostSchema);
+const userLoginMiddleware= bodyValidator(schemas.userLoginSchema);
+const userPutMiddleware=bodyValidator(schemas.userPutMiddleware);
 
 module.exports = {
     schemas,
     taskPostMiddleware,
     taskPutMiddleware,
-    taskPatchMiddleware
+    taskPatchMiddleware,
+    userPostMiddleware,
+    userLoginMiddleware,
+    userPutMiddleware
 };

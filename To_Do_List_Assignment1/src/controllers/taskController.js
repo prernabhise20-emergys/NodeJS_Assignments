@@ -53,7 +53,7 @@ const createNewTask = async (req, res) => {
         const data = req.body;
         const { title } = data;  
         const userId = req.user.id; 
-
+        
         const taskExists = await TaskModel.checkIfTaskExists({ title });
 
         if (taskExists) {
@@ -172,31 +172,6 @@ const deleteTask = async (req, res) => {
     }
 };
 
-// *****************************************************************************
-
-const restoreTask = async (req, res) => {
-    try {
-        const taskId = req.params.id;
-        const restoreTask = await TaskModel.restoreTask(taskId);
-
-        if (restoreTask.affectedRows === 0) {
-            res.status(404).send({
-                status: constantDetails.NOT_FOUND.STATUS_CODE,
-                message: constantDetails.NOT_FOUND.MESSAGE
-            });
-        }
-        return res.status(200).send({
-            status: constantDetails.SUCCESS.STATUS_CODE,
-            message: "Task restored successfully"
-        });
-
-    } catch (error) {
-        return res.status(500).send({
-            status: constantDetails.ERROR.STATUS_CODE,
-            message: constantDetails.ERROR.MESSAGE
-        });
-    }
-};
 
 // *****************************************************************************
 
@@ -291,7 +266,6 @@ module.exports = {
     getAllTaskDetails,
     createNewTask,
     updateTask,
-    restoreTask,
     deleteTask,
     getSpecificTaskDetails,
     sortingTask,

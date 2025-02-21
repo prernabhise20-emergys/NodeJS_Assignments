@@ -67,11 +67,10 @@ const checkIfTaskExists = async (taskInfo) => {
 const createNewTask = async (data, userId) => {
     try{
     return new Promise((resolve, reject) => {
-        const taskData = { ...data, USER_ID: userId }; 
+        const taskData = {...data, USER_ID: userId }; 
+        const query = "INSERT INTO TASKS SET ?";          
 
-        const query = "INSERT INTO TASKS SET ?";  
-
-        db.query(query, taskData, (error, result) => {
+        db.query(query,taskData, (error, result) => {
             if (error) {
                 console.error("Database insert error:", error);
                 return reject(new Error("Failed to create task"));

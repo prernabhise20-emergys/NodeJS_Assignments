@@ -18,5 +18,11 @@ module.exports = {
     NOT_FOUND:{
        STATUS_CODE:404,
         MESSAGE:"Data not found"
+    },
+    NO_TOKEN:{
+MESSAGE: "Access denied. No token provided."
+    },
+    INVALID:{
+MESSAGE: "Invalid token."
     }
 }
