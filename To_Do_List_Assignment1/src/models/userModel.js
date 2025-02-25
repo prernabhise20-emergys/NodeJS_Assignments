@@ -1,7 +1,6 @@
 const bcrypt = require('bcrypt');
 const db = require('../db/connection');
 
-
 const getAllUser = async () => {
 
     try {
@@ -56,12 +55,22 @@ const findUserByUsername = (username) => {
 
 // **********************************************************
 
-const updateUser = async ({ username, password, name, contact_no, userId }) => {
+const updateUser = async (formData,userId) => {
     try {
+        // const password1=formData.password;
+        // console.log(password1);
+        const{username,password,name,contact_no}=formData;
+        // const username=formData.username;
+        // const name=formData.name;
+        // const contact_no=formData.contact_no;
+
+        const hashPassword=await bcrypt.hash(password,10);
+        const user= { username, password:hashPassword, name, contact_no, userId };
+        
         const data = await new Promise((resolve, reject) => {
             db.query(
-                "UPDATE USERINFO SET USERNAME = ?, PASSWORD= ?, NAME = ?, CONTACT_NO=? WHERE USERID = ?",
-                [username, password, name, contact_no, userId],
+                "UPDATE USERINFO SET ? WHERE USERID = ?",
+                [user, userId],
                 (error, result) => {
                     if (error) {
                         console.error("Database query error", error);
@@ -78,6 +87,9 @@ const updateUser = async ({ username, password, name, contact_no, userId }) => {
         throw new Error(error.message);
     }
 };
+
+module.exports = { updateUser };
+
 
 // ******************************************************************
 
