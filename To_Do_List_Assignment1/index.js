@@ -15,7 +15,7 @@ const corsOptions = {
     credentials: true 
 };
 
-app.use(cors(corsOptions)); 
+app.use(cors(corsOptions));
 app.use(express.json());
 
 const taskRouter = require('./src/routes/taskRoute');
