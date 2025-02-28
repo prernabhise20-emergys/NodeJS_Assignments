@@ -22,14 +22,7 @@ const task_schemas = {
         due_date: Joi.date().optional().error(new Error("due_date is in date format"))
     }),
     updateStatusSchema: Joi.object({
-        // title: Joi.string().min(3).max(255).optional().error(new Error("title is in string format and min 3 letter are required")),
-        // created_date: Joi.date().optional().error(new Error("created_date is in date format")),
-        // created_by: Joi.string().email().optional().error(new Error("created_by is in string format")),
-        // updated_date: Joi.date().optional().error(new Error("updated_date is in date format")),
-        // updated_by: Joi.string().email().optional().error(new Error("updated_by is in string format")),
-        // description: Joi.string().optional().error(new Error("description is in string format")),
         status: Joi.string().required().error(new Error("status are only complete or incomplete")),
-        // due_date: Joi.date().optional().error(new Error("due_date is in date format"))
     }),
 };
 
