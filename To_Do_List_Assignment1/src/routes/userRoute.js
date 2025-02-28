@@ -1,15 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController'); 
+const authenticateUser = require('../middlewares/authMiddleware');
 const { bodyValidator } = require('../middlewares/taskValidation'); 
-const to_do_schemas = require('../constants/schemaConstant'); 
+const {user_schemas} = require('../constants/schemaConstant'); //USER SCHEMAS
 
-const{userPostSchema,userLoginSchema,userPutMiddleware}=to_do_schemas;
+const{createUserSchema,userLoginSchema,updateUserSchema}=user_schemas;
 
-router.post('/register', bodyValidator(userPostSchema), userController.register);
+router.post('/register', bodyValidator(createUserSchema), userController.register);
 router.post('/login', bodyValidator(userLoginSchema), userController.login);
-router.put('/updateUser/:id',  bodyValidator(userPutMiddleware), userController.updateUser);
-router.get('/getAllUser', userController.getAllUser);
-router.delete('/deleteUser/:id', userController.deleteUser);
+router.put('/updateUser',authenticateUser,bodyValidator(updateUserSchema), userController.updateUser); //userPutMiddleware??
+router.get('/getUser',authenticateUser, userController.getUser);
+router.delete('/deleteUser', authenticateUser,userController.deleteUser);
 
 module.exports = router;

@@ -1,16 +1,15 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const constantDetails = require('../constants/statusConstant')
-const userModel = require('../models/userModel')
+const userModel = require('../models/userModel');
+const { use } = require('../routes/taskRoute');
 require('dotenv').config();
-
 
 const register = async (req, res) => {
     try {
+        const { username, password, name, contact_no, email } = req.body;
 
-        const { username, password, name, contact_no } = req.body;
-
-        await userModel.createUser(username, password, name, contact_no);
+        await userModel.createUser(username, password, name, contact_no, email);
 
         res.status(constantDetails.CREATED.STATUS_CODE).json({
             status: constantDetails.CREATED.STATUS_CODE,
@@ -19,9 +18,13 @@ const register = async (req, res) => {
 
     }
     catch (error) {
+        console.error(error.message);
+
         res.status(constantDetails.ERROR.STATUS_CODE).json({
             status: constantDetails.ERROR.STATUS_CODE,
-            message: constantDetails.ERROR.MESSAGE
+            message: constantDetails.ERROR.MESSAGE,
+            errorMessage: error.message || constantDetails.UNEXPECTED_ERROR.MESSAGE
+
         });
     }
 };
@@ -32,7 +35,7 @@ const login = async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        const user = await userModel.findUserByUsername(username);
+        const user = await userModel.login(username);
 
         if (!user) {
             return res.status(constantDetails.INVALID_USER.STATUS_CODE).json({
@@ -41,8 +44,9 @@ const login = async (req, res) => {
             });
         }
 
-        const isMatch = await bcrypt.compare(password, user.PASSWORD);
-        if (!isMatch) {
+        const match = await bcrypt.compare(password, user.PASSWORD);
+
+        if (!match) {
             return res.status(constantDetails.INVALID_USER.STATUS_CODE).json({
                 status: constantDetails.INVALID_USER.STATUS_CODE,
                 message: constantDetails.INVALID_USER.MESSAGE
@@ -50,7 +54,7 @@ const login = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { id: user.USERID, username: user.USERNAME},
+            { id: user.USERID, username: user.USERNAME, email: user.EMAIL },
             process.env.SECRET_KEY,
             { expiresIn: '1h' }
         );
@@ -58,9 +62,12 @@ const login = async (req, res) => {
 
         res.json({ message: constantDetails.LOGIN.MESSAGE, token });
     } catch (error) {
+        console.error(error.message)
         res.status(constantDetails.ERROR.STATUS_CODE).json({
             status: constantDetails.ERROR.STATUS_CODE,
-            message: constantDetails.ERROR.MESSAGE
+            message: constantDetails.ERROR.MESSAGE,
+            errorMessage: error.message || constantDetails.UNEXPECTED_ERROR.MESSAGE
+
         });
     }
 };
@@ -69,9 +76,8 @@ const login = async (req, res) => {
 
 const updateUser = async (req, res) => {
     try {
-        const userId = req.params.id;
         const formData = req.body;
-        formData.userId = userId;
+        const { id: uid } = req.user
 
         const userExists = await userModel.checkIfUserExists(formData.username);
 
@@ -82,41 +88,42 @@ const updateUser = async (req, res) => {
             });
         }
 
-        const updateUserResult = await userModel.updateUser(formData,userId);
-
-        if (updateUserResult.affectedRows === 0) {
-            return res.status(constantDetails.NOT_FOUND.STATUS_CODE).send({
-                STATUS_CODE: constantDetails.NOT_FOUND.STATUS_CODE,
-                message: constantDetails.NOT_FOUND.MESSAGE
-            });
-        }
+            const updateUserResult = await userModel.updateUser(formData, uid);
 
         return res.status(constantDetails.SUCCESS.STATUS_CODE).send({
             status: constantDetails.SUCCESS.STATUS_CODE,
             message: constantDetails.SUCCESS.MESSAGE
         });
     } catch (error) {
+        console.error(error.message)
         return res.status(constantDetails.ERROR.STATUS_CODE).send({
             status: constantDetails.ERROR.STATUS_CODE,
-            message: constantDetails.ERROR.MESSAGE
+            message: constantDetails.ERROR.MESSAGE,
+            errorMessage: error.message || constantDetails.UNEXPECTED_ERROR.MESSAGE
+
         });
     }
 };
 
 // *************************************************************************
 
-const getAllUser = async (req, res) => {
+const getUser = async (req, res) => {
     try {
-        const tasks = await userModel.getAllUser();
+        const { id: userId } = req.user
+
+        const tasks = await userModel.getUser(userId);
         return res.status(constantDetails.SUCCESS.STATUS_CODE).send({
             status: constantDetails.SUCCESS.STATUS_CODE,
             message: constantDetails.SUCCESS.MESSAGE,
             data: tasks
         });
     } catch (error) {
+        console.error(error.message)
         return res.status(constantDetails.ERROR.STATUS_CODE).send({
             status: constantDetails.ERROR.STATUS_CODE,
-            message: constantDetails.ERROR.MESSAGE
+            message: constantDetails.ERROR.MESSAGE,
+            errorMessage: error.message || constantDetails.UNEXPECTED_ERROR.MESSAGE
+
         });
     }
 };
@@ -125,16 +132,11 @@ const getAllUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
     try {
-        const userId = req.params.id;
 
-        const deleteUser = await userModel.deleteUser(userId);
+        const { id: userId } = req.user
 
-        if (deleteUser.affectedRows === 0) {
-            res.status(constantDetails.NOT_FOUND.STATUS_CODE).send({
-                status: constantDetails.NOT_FOUND.STATUS_CODE,
-                message: constantDetails.NOT_FOUND.MESSAGE
-            })
-        }
+            const deleteUser = await userModel.deleteUser(userId);
+       
         return res.status(constantDetails.SUCCESS.STATUS_CODE).send({
             status: constantDetails.SUCCESS.STATUS_CODE,
             message: constantDetails.SUCCESS.MESSAGE,
@@ -142,9 +144,12 @@ const deleteUser = async (req, res) => {
         });
 
     } catch (error) {
+        console.error(error.message)
         return res.status(constantDetails.ERROR.STATUS_CODE).send({
             status: constantDetails.ERROR.STATUS_CODE,
-            message: constantDetails.ERROR.MESSAGE
+            message: constantDetails.ERROR.MESSAGE,
+            errorMessage: error.message || constantDetails.UNEXPECTED_ERROR.MESSAGE
+
         });
     }
 };
@@ -154,6 +159,6 @@ module.exports = {
     register,
     login,
     updateUser,
-    getAllUser,
+    getUser,
     deleteUser
 };

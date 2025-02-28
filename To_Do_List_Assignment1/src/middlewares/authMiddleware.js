@@ -5,28 +5,34 @@ const constantDetails = require('../constants/statusConstant')
 
 const authenticateUser = (req, res, next) => {
     const token = req.header("Authorization")
-    // ?
-    // .split(" ")[1];
+
     try {
         if (!token) {
-            return res.status(401).json({
+            return res.status(constantDetails.NO_TOKEN.STATUS_CODE).json({
+                status: constantDetails.NO_TOKEN.STATUS_CODE,
                 message: constantDetails.NO_TOKEN.MESSAGE
             });
         }
-    // console.log("1",req.user);
-    
-        const decoded = jwt.verify(token, process.env.SECRET_KEY);
-        // console.log(decoded);
-        
+
+        const decoded = jwt.verify(token, process.env.SECRET_KEY)
+
+        if(!decoded){
+            if (err) {
+                return res.status(constantDetails.FORBIDDEN_ERROR.STATUS_CODE).json({
+                    status: constantDetails.FORBIDDEN_ERROR.STATUS_CODE,
+                    message: constantDetails.FORBIDDEN_ERROR.MESSAGE
+                });
+            }
+        }
+
         req.user = decoded;
 
-        // console.log("2",req.user);
 
         next();
     }
     catch (error) {
-        res.status(400).json({
-            message: constantDetails.INVALID.MESSAGE
+        res.status(constantDetails.NOT_FOUND.STATUS_CODE).json({
+            message: constantDetails.NOT_FOUND.MESSAGE
         });
     }
 };

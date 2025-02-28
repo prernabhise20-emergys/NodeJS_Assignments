@@ -3,7 +3,7 @@ const toLower = require('../utility/bodyConverter');
 const bodyValidator = (schema) => {
     return (req, res, next) => {
         try {
-            req.body = toLower(req.body);  
+            // req.body = toLower(req.body);  
 
             const { error } =schema.validate(req.body);
             if (error) {
