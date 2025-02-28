@@ -85,6 +85,7 @@ const createNewTask = async (data, userId, email) => {
 };
 
 // ******************************************************************
+
 const updateTask = async (title, description, taskId, userId) => {
     try {
         const data = await new Promise((resolve, reject) => {

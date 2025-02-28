@@ -1,5 +1,3 @@
-const toLower = require('../utility/bodyConverter');
-
 const bodyValidator = (schema) => {
     return (req, res, next) => {
         try {

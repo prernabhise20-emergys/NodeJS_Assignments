@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const constantDetails = require('../constants/statusConstant')
+const {message,status} = require("../constants/statusConstant")
 const userModel = require('../models/userModel');
 const { use } = require('../routes/taskRoute');
 require('dotenv').config();
@@ -11,19 +11,19 @@ const register = async (req, res) => {
 
         await userModel.createUser(username, password, name, contact_no, email);
 
-        res.status(constantDetails.CREATED.STATUS_CODE).json({
-            status: constantDetails.CREATED.STATUS_CODE,
-            message: constantDetails.REGISTER.MESSAGE
+        res.status(status.CREATED).json({
+            status: status.CREATED,
+            message: message.CREATED_MESSAGE
         });
 
     }
     catch (error) {
         console.error(error.message);
 
-        res.status(constantDetails.ERROR.STATUS_CODE).json({
-            status: constantDetails.ERROR.STATUS_CODE,
-            message: constantDetails.ERROR.MESSAGE,
-            errorMessage: error.message || constantDetails.UNEXPECTED_ERROR.MESSAGE
+        res.status(status.SERVER_ERROR).json({
+            status: status.SERVER_ERROR,
+            message: message.SERVER_ERROR_MESSAGE,
+            errorMessage: error.message || message.UNEXPECTED_ERROR
 
         });
     }
@@ -38,18 +38,18 @@ const login = async (req, res) => {
         const user = await userModel.login(username);
 
         if (!user) {
-            return res.status(constantDetails.INVALID_USER.STATUS_CODE).json({
-                status: constantDetails.INVALID_USER.STATUS_CODE,
-                message: constantDetails.INVALID_USER.MESSAGE
+            return res.status(status.INVALID).json({
+                status: status.INVALID,
+                message: message.INVALID_USER_MESSAGE
             });
         }
 
         const match = await bcrypt.compare(password, user.PASSWORD);
 
         if (!match) {
-            return res.status(constantDetails.INVALID_USER.STATUS_CODE).json({
-                status: constantDetails.INVALID_USER.STATUS_CODE,
-                message: constantDetails.INVALID_USER.MESSAGE
+            return res.status(status.INVALID).json({
+                status: status.INVALID,
+                message: message.INVALID_USER_MESSAGE
             });
         }
 
@@ -60,13 +60,13 @@ const login = async (req, res) => {
         );
 
 
-        res.json({ message: constantDetails.LOGIN.MESSAGE, token });
+        res.json({ message: message.LOGIN_SUCCESS_MESSAGE, token });
     } catch (error) {
         console.error(error.message)
-        res.status(constantDetails.ERROR.STATUS_CODE).json({
-            status: constantDetails.ERROR.STATUS_CODE,
-            message: constantDetails.ERROR.MESSAGE,
-            errorMessage: error.message || constantDetails.UNEXPECTED_ERROR.MESSAGE
+        res.status(status.SERVER_ERROR).json({
+            status: status.SERVER_ERROR,
+            message:  message.SERVER_ERROR_MESSAGE,
+            errorMessage: error.message || message.UNEXPECTED_ERROR
 
         });
     }
@@ -82,24 +82,24 @@ const updateUser = async (req, res) => {
         const userExists = await userModel.checkIfUserExists(formData.username);
 
         if (userExists) {
-            return res.status(500).send({
-                status: constantDetails.ERROR.STATUS_CODE,
-                message: constantDetails.DUPLICATE.MESSAGE,
+            return res.status(status.SERVER_ERROR).send({
+                status: status.SERVER_ERROR,
+                message: message.INVALID_USER_MESSAGE,
             });
         }
 
             const updateUserResult = await userModel.updateUser(formData, uid);
 
-        return res.status(constantDetails.SUCCESS.STATUS_CODE).send({
-            status: constantDetails.SUCCESS.STATUS_CODE,
-            message: constantDetails.SUCCESS.MESSAGE
+        return res.status(status.SUCCESS).send({
+            status: status.SUCCESS,
+            message: message.SUCCESS_MESSAGE
         });
     } catch (error) {
         console.error(error.message)
-        return res.status(constantDetails.ERROR.STATUS_CODE).send({
-            status: constantDetails.ERROR.STATUS_CODE,
-            message: constantDetails.ERROR.MESSAGE,
-            errorMessage: error.message || constantDetails.UNEXPECTED_ERROR.MESSAGE
+        return res.status(status.SERVER_ERROR).send({
+            status: status.SERVER_ERROR,
+            message:  message.SERVER_ERROR_MESSAGE,
+            errorMessage: error.message || message.UNEXPECTED_ERROR
 
         });
     }
@@ -112,17 +112,17 @@ const getUser = async (req, res) => {
         const { id: userId } = req.user
 
         const tasks = await userModel.getUser(userId);
-        return res.status(constantDetails.SUCCESS.STATUS_CODE).send({
-            status: constantDetails.SUCCESS.STATUS_CODE,
-            message: constantDetails.SUCCESS.MESSAGE,
+        return res.status(status.SUCCESS).send({
+            status: status.SUCCESS,
+            message: message.SUCCESS_MESSAGE,
             data: tasks
         });
     } catch (error) {
         console.error(error.message)
-        return res.status(constantDetails.ERROR.STATUS_CODE).send({
-            status: constantDetails.ERROR.STATUS_CODE,
-            message: constantDetails.ERROR.MESSAGE,
-            errorMessage: error.message || constantDetails.UNEXPECTED_ERROR.MESSAGE
+        return res.status(status.SERVER_ERROR).send({
+            status: status.SERVER_ERROR,
+            message:  message.SERVER_ERROR_MESSAGE,
+            errorMessage: error.message || message.UNEXPECTED_ERROR
 
         });
     }
@@ -137,18 +137,18 @@ const deleteUser = async (req, res) => {
 
             const deleteUser = await userModel.deleteUser(userId);
        
-        return res.status(constantDetails.SUCCESS.STATUS_CODE).send({
-            status: constantDetails.SUCCESS.STATUS_CODE,
-            message: constantDetails.SUCCESS.MESSAGE,
+        return res.status(status.SUCCESS).send({
+            status: status.SUCCESS,
+            message: message.SUCCESS_MESSAGE,
             user: deleteUser
         });
 
     } catch (error) {
         console.error(error.message)
-        return res.status(constantDetails.ERROR.STATUS_CODE).send({
-            status: constantDetails.ERROR.STATUS_CODE,
-            message: constantDetails.ERROR.MESSAGE,
-            errorMessage: error.message || constantDetails.UNEXPECTED_ERROR.MESSAGE
+        return res.status(status.SERVER_ERROR).send({
+            status: status.SERVER_ERROR,
+            message:  message.SERVER_ERROR_MESSAGE,
+            errorMessage: error.message || message.UNEXPECTED_ERROR
 
         });
     }

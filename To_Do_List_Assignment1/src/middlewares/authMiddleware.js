@@ -1,26 +1,27 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-const constantDetails = require('../constants/statusConstant')
+const { message, status } = require("../constants/statusConstant")
 
 
 const authenticateUser = (req, res, next) => {
-    const token = req.header("Authorization")
 
     try {
+        const token = req.header("Authorization")
+
         if (!token) {
-            return res.status(constantDetails.NO_TOKEN.STATUS_CODE).json({
-                status: constantDetails.NO_TOKEN.STATUS_CODE,
-                message: constantDetails.NO_TOKEN.MESSAGE
+            return res.status(status.INVALID).json({
+                status: status.INVALID,
+                message: message.INVALID_TOKEN_MESSAGE
             });
         }
 
         const decoded = jwt.verify(token, process.env.SECRET_KEY)
 
-        if(!decoded){
+        if (!decoded) {
             if (err) {
-                return res.status(constantDetails.FORBIDDEN_ERROR.STATUS_CODE).json({
-                    status: constantDetails.FORBIDDEN_ERROR.STATUS_CODE,
-                    message: constantDetails.FORBIDDEN_ERROR.MESSAGE
+                return res.status(status.FORBIDDEN).json({
+                    status: status.FORBIDDEN,
+                    message: message.FORBIDDEN_ERROR_MESSAGE
                 });
             }
         }
@@ -31,8 +32,9 @@ const authenticateUser = (req, res, next) => {
         next();
     }
     catch (error) {
-        res.status(constantDetails.NOT_FOUND.STATUS_CODE).json({
-            message: constantDetails.NOT_FOUND.MESSAGE
+        res.status(status.INVALID).json({
+            status: status.INVALID,
+            message: message.INVALID_TOKEN_MESSAGE
         });
     }
 };
