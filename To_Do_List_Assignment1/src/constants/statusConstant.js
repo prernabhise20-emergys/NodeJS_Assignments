@@ -1,4 +1,4 @@
-const status = {
+const STATUS_CODE = {
     CREATED: 201,
     SUCCESS: 200,
     SERVER_ERROR: 500,
@@ -9,7 +9,7 @@ const status = {
     FORBIDDEN: 403
 }
 
-const message = {
+const MESSAGE = {
     CREATED_MESSAGE: "Created Successfully",
     SUCCESS_MESSAGE: "Action Perform Successfully",
     SERVER_ERROR_MESSAGE: "Internal Server Error",
@@ -32,4 +32,4 @@ const message = {
     FORBIDDEN_ERROR_MESSAGE: "Failed to authenticate token"
 }
 
-module.exports={status,message}
+module.exports={STATUS_CODE,MESSAGE}

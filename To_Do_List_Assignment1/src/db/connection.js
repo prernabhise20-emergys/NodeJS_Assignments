@@ -8,8 +8,6 @@ user:process.env.DB_USER,
 password:process.env.DB_PASSWORD,
 database:process.env.DATABASE
 });
-
-
  
 connection.connect((error)=>{
     if(error){
@@ -23,13 +21,3 @@ connection.connect((error)=>{
 })
 
 module.exports=connection;
-
-
-// TaskModel.getTasks()
-        // .then(tasks => {
-        //     res.status(200).json(tasks);  
-        // })
-        // .catch(error => {
-        //     console.log('Error:', error);
-        //    return res.status(500).send({ message: "Internal Server Error" });
-        // });

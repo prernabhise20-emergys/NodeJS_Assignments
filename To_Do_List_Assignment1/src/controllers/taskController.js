@@ -1,5 +1,5 @@
 const TaskModel = require("../models/taskModel");
-const { message, status } = require("../constants/statusConstant");
+const { MESSAGE, STATUS_CODE } = require("../constants/statusConstant");
 
 // ******************************************************************
 
@@ -8,17 +8,17 @@ const getAllTaskDetails = async (req, res) => {
     const { id: userId } = req.user;
     const tasks = await TaskModel.getTasks(userId);
 
-    return res.status(status.SUCCESS).send({
-      status: status.SUCCESS,
-      message: message.SUCCESS_MESSAGE,
+    return res.status(STATUS_CODE.SUCCESS).send({
+      status:STATUS_CODE.SUCCESS,
+      message: MESSAGE.SUCCESS_MESSAGE,
       data: tasks,
     });
   } catch (error) {
     console.error(error.message);
-    return res.status(status.ERROR).send({
-      status: status.ERROR,
-      message: message.SERVER_ERROR_MESSAGE,
-      errorMessage: error.message || message.SERVER_ERROR_MESSAGE,
+    return res.status(STATUS_CODE.ERROR).send({
+      status: STATUS_CODE.ERROR,
+      message: MESSAGE.SERVER_ERROR_MESSAGE,
+      errorMessage: error.message || MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -32,22 +32,22 @@ const getSpecificTaskDetails = async (req, res) => {
 
     const task = await TaskModel.getSpecificTask(taskId, userId);
     if (task.length === 0) {
-      return res.status(status.NOT_FOUND).send({
-        status: status.NOT_FOUND,
-        message: message.NOT_FOUND_MESSAGE,
+      return res.status(STATUS_CODE.NOT_FOUND).send({
+        status: STATUS_CODE.NOT_FOUND,
+        message:MESSAGE.NOT_FOUND_MESSAGE,
       });
     }
-    res.status(status.SUCCESS).send({
-      status: status.SUCCESS,
-      message: message.SUCCESS_MESSAGE,
+    res.status(STATUS_CODE.SUCCESS).send({
+      status: STATUS_CODE.SUCCESS,
+      message: MESSAGE.SUCCESS_MESSAGE,
       data: task,
     });
   } catch (error) {
     console.error(error.message);
-    return res.status(status.SERVER_ERROR).send({
-      status: status.SERVER_ERROR,
-      message: message.SERVER_ERROR_MESSAGE,
-      errorMessage: error.message || message.UNEXPECTED_ERROR,
+    return res.status(STATUS_CODE.SERVER_ERROR).send({
+      status: STATUS_CODE.SERVER_ERROR,
+      message: MESSAGE.SERVER_ERROR_MESSAGE,
+      errorMessage: error.message || MESSAGE.UNEXPECTED_ERROR,
     });
   }
 };
@@ -63,26 +63,26 @@ const createNewTask = async (req, res) => {
     const taskExists = await TaskModel.checkIfTaskExists(title);
 
     if (taskExists) {
-      return res.status(status.BAD_REQUEST).send({
-        status: status.BAD_REQUEST,
-        message: message.BAD_REQUEST_MESSAGE,
+      return res.status(STATUS_CODE.BAD_REQUEST).send({
+        status: STATUS_CODE.BAD_REQUEST,
+        message: MESSAGE.DUPLICATE_ERROR_MESSAGE,
       });
     }
 
     const task = await TaskModel.createNewTask({ title, description, due_date },USER_ID,EMAIL);
 
-    res.status(status.CREATED).send({
-      status: status.CREATED,
-      message: message.CREATED_MESSAGE,
+    res.status(STATUS_CODE.CREATED).send({
+      status: STATUS_CODE.CREATED,
+      message: MESSAGE.CREATED_MESSAGE,
       data: task,
     });
-    
+
   } catch (error) {
     console.error(error.message);
-    return res.status(status.SERVER_ERROR).send({
-      status: status.SERVER_ERROR,
-      message: message.SERVER_ERROR_MESSAGE,
-      errorMessage: error.message || message.SERVER_ERROR_MESSAGE,
+    return res.status(STATUS_CODE.SERVER_ERROR).send({
+      status: STATUS_CODE.SERVER_ERROR,
+      message:MESSAGE.SERVER_ERROR_MESSAGE,
+      errorMessage: error.message || MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -95,12 +95,12 @@ const updateTask = async (req, res) => {
     const { id: taskId } = req.params;
     const { id: userId } = req.user;
 
-    const taskExists = await TaskModel.checkIfTaskExists({ title });
+    const taskExists = await TaskModel.checkIfTaskExists(title);
 
     if (taskExists) {
-      return res.status(status.BAD_REQUEST).send({
-        status: status.BAD_REQUEST,
-        message: message.DUPLICATE_ERROR_MESSAGE,
+      return res.status(STATUS_CODE.BAD_REQUEST).send({
+        status: STATUS_CODE.BAD_REQUEST,
+        message: MESSAGE.DUPLICATE_ERROR_MESSAGE,
       });
     }
 
@@ -112,22 +112,22 @@ const updateTask = async (req, res) => {
     );
 
     if (updateTaskResult.affectedRows === 0) {
-      return res.status(status.NOT_FOUND).send({
-        STATUS_CODE: status.NOT_FOUND,
-        message: message.NOT_FOUND_MESSAGE,
+      return res.status(STATUS_CODE.NOT_FOUND).send({
+        STATUS_CODE: STATUS_CODE.NOT_FOUND,
+        message: MESSAGE.NOT_FOUND_MESSAGE,
       });
     }
 
-    return res.status(status.SUCCESS).send({
-      status: status.SUCCESS,
-      message: message.SUCCESS_MESSAGE,
+    return res.status(STATUS_CODE.SUCCESS).send({
+      status: STATUS_CODE.SUCCESS,
+      message: MESSAGE.SUCCESS_MESSAGE,
     });
   } catch (error) {
     console.error(error.message);
-    return res.status(status.SERVER_ERROR).send({
-      status: status.SERVER_ERROR,
-      message: message.SERVER_ERROR_MESSAGE,
-      errorMessage: error.message || message.UNEXPECTED_ERROR,
+    return res.status(STATUS_CODE.SERVER_ERROR).send({
+      status: STATUS_CODE.SERVER_ERROR,
+      message: MESSAGE.SERVER_ERROR_MESSAGE,
+      errorMessage: error.message || MESSAGE.UNEXPECTED_ERROR,
     });
   }
 };
@@ -147,23 +147,23 @@ const patchTask = async (req, res) => {
     );
 
     if (updateStatusResult.affectedRows === 0) {
-      res.status(status.NOT_FOUND).send({
-        status: status.NOT_FOUND,
-        message: message.NOT_FOUND_MESSAGE,
+      res.status(STATUS_CODE.NOT_FOUND).send({
+        status: STATUS_CODE.NOT_FOUND,
+        message: MESSAGE.NOT_FOUND_MESSAGE,
       });
     }
-    return res.status(status.SUCCESS).send({
-      status: status.SUCCESS,
-      message: message.SUCCESS_MESSAGE,
+    return res.status(STATUS_CODE.SUCCESS).send({
+      status: STATUS_CODE.SUCCESS,
+      message: MESSAGE.SUCCESS_MESSAGE,
       data: updateStatusResult,
     });
   } catch (error) {
     console.error(error.message);
 
-    return res.status(status.SERVER_ERROR).send({
-      status: status.SERVER_ERROR,
-      message: message.SERVER_ERROR_MESSAGE,
-      errorMessage: error.message || message.UNEXPECTED_ERROR,
+    return res.status(STATUS_CODE.SERVER_ERROR).send({
+      status: STATUS_CODE.SERVER_ERROR,
+      message: MESSAGE.SERVER_ERROR_MESSAGE,
+      errorMessage: error.message || MESSAGE.UNEXPECTED_ERROR,
     });
   }
 };
@@ -178,22 +178,22 @@ const deleteTask = async (req, res) => {
     const deleteTask = await TaskModel.deleteTask(taskId, userId);
 
     if (deleteTask.affectedRows === 0) {
-      res.status(status.NOT_FOUND).send({
-        status: status.NOT_FOUND,
-        message: message.NOT_FOUND_MESSAGE,
+      res.status(STATUS_CODE.NOT_FOUND).send({
+        status: STATUS_CODE.NOT_FOUND,
+        message: MESSAGE.NOT_FOUND_MESSAGE,
       });
     }
-    return res.status(status.SUCCESS).send({
-      status: status.SUCCESS,
-      message: message.SUCCESS_MESSAGE,
+    return res.status(STATUS_CODE.SUCCESS).send({
+      status: STATUS_CODE.SUCCESS,
+      message: MESSAGE.SUCCESS_MESSAGE,
     });
   } catch (error) {
     console.error(error.message);
 
-    return res.status(status.SERVER_ERROR).send({
-      status: status.SERVER_ERROR,
-      message: message.SERVER_ERROR_MESSAGE,
-      errorMessage: error.message || message.UNEXPECTED_ERROR,
+    return res.status(STATUS_CODE.SERVER_ERROR).send({
+      status: STATUS_CODE.SERVER_ERROR,
+      message: MESSAGE.SERVER_ERROR_MESSAGE,
+      errorMessage: error.message || MESSAGE.UNEXPECTED_ERROR,
     });
   }
 };
@@ -213,18 +213,18 @@ const sortingTask = async (req, res) => {
 
     const tasks = await TaskModel.getSortedTasks(sortField, sortOrder, userId);
 
-    return res.status(status.SUCCESS).send({
-      status: status.SUCCESS,
-      message: message.SUCCESS_MESSAGE,
+    return res.status(STATUS_CODE.SUCCESS).send({
+      status: STATUS_CODE.SUCCESS,
+      message: MESSAGE.SUCCESS_MESSAGE,
       data: tasks,
     });
   } catch (error) {
     console.error(error.message);
 
-    return res.status(status.SERVER_ERROR).send({
-      status: status.SERVER_ERROR,
-      message: message.SERVER_ERROR_MESSAGE,
-      errorMessage: error.message || message.UNEXPECTED_ERROR,
+    return res.status(STATUS_CODE.SERVER_ERROR).send({
+      status: STATUS_CODE.SERVER_ERROR,
+      message: MESSAGE.SERVER_ERROR_MESSAGE,
+      errorMessage: error.message || MESSAGE.UNEXPECTED_ERROR,
     });
   }
 };
@@ -237,37 +237,37 @@ const searchTasks = async (req, res) => {
     const { id: userId } = req.user;
 
     if (!column || !["title", "description"].includes(column)) {
-      return res.status(status.BAD_REQUEST).send({
-        status: status.BAD_REQUEST,
-        message: message.INVALID_COLUMN_MESSAGE,
+      return res.status(STATUS_CODE.BAD_REQUEST).send({
+        status: STATUS_CODE.BAD_REQUEST,
+        message: MESSAGE.INVALID_COLUMN_MESSAGE,
       });
     }
     if (!keyword) {
-      return res.status(status.BAD_REQUEST).send({
-        status: status.BAD_REQUEST,
-        message: message.MISSING_KEYWORD_MESSAGE,
+      return res.status(STATUS_CODE.BAD_REQUEST).send({
+        status: STATUS_CODE.BAD_REQUEST,
+        message: MESSAGE.MISSING_KEYWORD_MESSAGE,
       });
     }
     const tasks = await TaskModel.getSearchedTasks(userId, column, keyword);
     if (tasks.length === 0) {
-      return res.status(status.NOT_FOUND).send({
-        status: status.NOT_FOUND,
-        message: message.NOT_FOUND_MESSAGE,
+      return res.status(STATUS_CODE.NOT_FOUND).send({
+        status: STATUS_CODE.NOT_FOUND,
+        message: MESSAGE.NOT_FOUND_MESSAGE,
       });
     } else {
-      return res.status(status.SUCCESS).send({
-        status: status.SUCCESS,
-        message: message.SUCCESS_MESSAGE,
+      return res.status(STATUS_CODE.SUCCESS).send({
+        status: STATUS_CODE.SUCCESS,
+        message: MESSAGE.SUCCESS_MESSAGE,
         data: tasks,
       });
     }
   } catch (error) {
     console.error(error.message);
 
-    return res.status(status.SERVER_ERROR).send({
-      status: status.SERVER_ERROR,
-      message: message.SERVER_ERROR_MESSAGE,
-      errorMessage: error.message || message.UNEXPECTED_ERROR,
+    return res.status(STATUS_CODE.SERVER_ERROR).send({
+      status: STATUS_CODE.SERVER_ERROR,
+      message: MESSAGE.SERVER_ERROR_MESSAGE,
+      errorMessage: error.message || MESSAGE.UNEXPECTED_ERROR,
     });
   }
 };
@@ -281,30 +281,25 @@ const filterTasks = async (req, res) => {
     const { column, keyword, status, dueDate } = req.query;
 
     if (column && !["title", "description"].includes(column)) {
-      return res.status(status.NOT_FOUND).send({
-        status: status.NOT_FOUND,
-        message: message.NOT_FOUND_MESSAGE,
+      return res.status(STATUS_CODE.NOT_FOUND).send({
+        status: STATUS_CODE.NOT_FOUND,
+        message: MESSAGE.NOT_FOUND_MESSAGE,
       });
     }
-    const tasks = await TaskModel.getFilteredTasks(
-      column,
-      keyword,
-      status,
-      dueDate,
-      userId
-    );
-    return res.status(status.SUCCESS).send({
-      status: status.SUCCESS,
-      message: message.SUCCESS_MESSAGE,
+    
+    const tasks = await TaskModel.getFilteredTasks(column, keyword, status, dueDate, userId);
+    return res.status(STATUS_CODE.SUCCESS).send({
+      status: STATUS_CODE.SUCCESS,
+      message: MESSAGE.SUCCESS_MESSAGE,
       data: tasks,
     });
   } catch (error) {
     console.error(error.message);
 
-    return res.status(status.SERVER_ERROR).send({
-      status: status.SERVER_ERROR,
-      message: message.SERVER_ERROR_MESSAGE,
-      errorMessage: error.message || message.UNEXPECTED_ERROR,
+    return res.status(STATUS_CODE.SERVER_ERROR).send({
+      status: STATUS_CODE.SERVER_ERROR,
+      message: MESSAGE.SERVER_ERROR_MESSAGE,
+      errorMessage: error.message || MESSAGE.UNEXPECTED_ERROR,
     });
   }
 };
