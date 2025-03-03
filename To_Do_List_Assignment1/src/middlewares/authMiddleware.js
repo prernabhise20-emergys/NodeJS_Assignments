@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-const { message, status } = require("../constants/statusConstant")
+const { MESSAGE, STATUS_CODE } = require("../constants/statusConstant")
 
 
 const authenticateUser = (req, res, next) => {
@@ -9,9 +9,9 @@ const authenticateUser = (req, res, next) => {
         const token = req.header("Authorization")
 
         if (!token) {
-            return res.status(status.INVALID).json({
-                status: status.INVALID,
-                message: message.INVALID_TOKEN_MESSAGE
+            return res.status(STATUS_CODE .INVALID).json({
+                status: STATUS_CODE .INVALID,
+                message:  MESSAGE.INVALID_TOKEN_MESSAGE
             });
         }
 
@@ -19,9 +19,9 @@ const authenticateUser = (req, res, next) => {
 
         if (!decoded) {
             if (err) {
-                return res.status(status.FORBIDDEN).json({
-                    status: status.FORBIDDEN,
-                    message: message.FORBIDDEN_ERROR_MESSAGE
+                return res.status(STATUS_CODE.FORBIDDEN).json({
+                    status: STATUS_CODE.FORBIDDEN,
+                    message:  MESSAGE.FORBIDDEN_ERROR_MESSAGE
                 });
             }
         }
@@ -32,9 +32,9 @@ const authenticateUser = (req, res, next) => {
         next();
     }
     catch (error) {
-        res.status(status.INVALID).json({
-            status: status.INVALID,
-            message: message.INVALID_TOKEN_MESSAGE
+        res.status( STATUS_CODE.INVALID).json({
+            status:  STATUS_CODE.INVALID,
+            message:  MESSAGE.INVALID_TOKEN_MESSAGE
         });
     }
 };

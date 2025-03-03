@@ -111,13 +111,12 @@ const deleteUser = async (userId) => {
 
 // ********************************************************************
 
-const checkIfUserExists = async (userInfo) => {
+const checkIfUserExists = async (username, password, contact_no, email) => {
     try {
-        const { username } = userInfo;
 
         const result = await new Promise((resolve, reject) => {
-            db.query("SELECT * FROM USERINFO WHERE USERNAME = ?",
-                [username], (error, results) => {
+            db.query("SELECT * FROM USERINFO WHERE USERNAME = ? OR PASSWORD=? OR CONTACT_NO=? OR EMAIL=?",
+                [username, password, contact_no, email], (error, results) => {
                     if (error) {
                         console.error("Database query error:", error);
                         return reject(new Error("Failed to check user in data"));

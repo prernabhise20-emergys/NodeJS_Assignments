@@ -9,7 +9,7 @@ const getAllTaskDetails = async (req, res) => {
     const tasks = await TaskModel.getTasks(userId);
 
     return res.status(STATUS_CODE.SUCCESS).send({
-      status:STATUS_CODE.SUCCESS,
+      status: STATUS_CODE.SUCCESS,
       message: MESSAGE.SUCCESS_MESSAGE,
       data: tasks,
     });
@@ -34,7 +34,7 @@ const getSpecificTaskDetails = async (req, res) => {
     if (task.length === 0) {
       return res.status(STATUS_CODE.NOT_FOUND).send({
         status: STATUS_CODE.NOT_FOUND,
-        message:MESSAGE.NOT_FOUND_MESSAGE,
+        message: MESSAGE.NOT_FOUND_MESSAGE,
       });
     }
     res.status(STATUS_CODE.SUCCESS).send({
@@ -56,7 +56,9 @@ const getSpecificTaskDetails = async (req, res) => {
 
 const createNewTask = async (req, res) => {
   try {
-    const {body: { title, description, due_date }} = req;
+    const {
+      body: { title, description, due_date },
+    } = req;
 
     const { id: USER_ID, email: EMAIL } = req.user;
 
@@ -69,19 +71,22 @@ const createNewTask = async (req, res) => {
       });
     }
 
-    const task = await TaskModel.createNewTask({ title, description, due_date },USER_ID,EMAIL);
+    const task = await TaskModel.createNewTask(
+      { title, description, due_date },
+      USER_ID,
+      EMAIL
+    );
 
     res.status(STATUS_CODE.CREATED).send({
       status: STATUS_CODE.CREATED,
       message: MESSAGE.CREATED_MESSAGE,
       data: task,
     });
-
   } catch (error) {
     console.error(error.message);
     return res.status(STATUS_CODE.SERVER_ERROR).send({
       status: STATUS_CODE.SERVER_ERROR,
-      message:MESSAGE.SERVER_ERROR_MESSAGE,
+      message: MESSAGE.SERVER_ERROR_MESSAGE,
       errorMessage: error.message || MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
@@ -286,8 +291,14 @@ const filterTasks = async (req, res) => {
         message: MESSAGE.NOT_FOUND_MESSAGE,
       });
     }
-    
-    const tasks = await TaskModel.getFilteredTasks(column, keyword, status, dueDate, userId);
+
+    const tasks = await TaskModel.getFilteredTasks(
+      column,
+      keyword,
+      status,
+      dueDate,
+      userId
+    );
     return res.status(STATUS_CODE.SUCCESS).send({
       status: STATUS_CODE.SUCCESS,
       message: MESSAGE.SUCCESS_MESSAGE,

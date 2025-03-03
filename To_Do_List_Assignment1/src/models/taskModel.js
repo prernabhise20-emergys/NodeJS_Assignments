@@ -91,7 +91,7 @@ const updateTask = async (title, description, taskId, userId) => {
   try {
     const data = await new Promise((resolve, reject) => {
       db.query(
-        "UPDATE tasks SET TITLE = ?, DESCRIPTION = ? WHERE ID = ? and USER_ID=?",
+        "UPDATE tasks SET TITLE = ? OR DESCRIPTION = ? WHERE ID = ? and USER_ID=?",
         [title, description, taskId, userId],
         (error, result) => {
           if (error) {

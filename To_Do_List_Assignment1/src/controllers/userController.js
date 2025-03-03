@@ -2,12 +2,20 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const {MESSAGE,STATUS_CODE} = require("../constants/statusConstant")
 const userModel = require('../models/userModel');
-const { use } = require('../routes/taskRoute');
+// const { use } = require('../routes/taskRoute');
 require('dotenv').config();
 
 const register = async (req, res) => {
     try {
         const { username, password, name, contact_no, email } = req.body;
+        
+    const userExists = await userModel.checkIfUserExists(username, password, contact_no, email);
+    if (userExists) {
+        return res.status(STATUS_CODE.BAD_REQUEST).send({
+          status: STATUS_CODE.BAD_REQUEST,
+          message: MESSAGE.DUPLICATE_ERROR_MESSAGE,
+        });
+      }
 
         await userModel.createUser(username, password, name, contact_no, email);
 
@@ -56,7 +64,7 @@ const login = async (req, res) => {
         const token = jwt.sign(
             { id: user.USERID, username: user.USERNAME, email: user.EMAIL },
             process.env.SECRET_KEY,
-            { expiresIn: '1h' }
+            { expiresIn: '3h' }
         );
 
 
