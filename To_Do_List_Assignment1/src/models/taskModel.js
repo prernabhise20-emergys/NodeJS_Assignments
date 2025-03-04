@@ -236,39 +236,6 @@ const getFilteredTasks = (column, keyword, status, dueDate, userId) => {
   }
 };
 
-// const getFilteredTasks = ({ column, keyword, status, dueDate, userId }) => {
-//     return new Promise((resolve, reject) => {
-//         try {
-//             let query;
-
-//             if (column && keyword) {
-//                 query = `SELECT * FROM tasks WHERE 1=1 AND USER_ID=? AND ${column} LIKE '%${keyword}%'`;
-//             }
-
-//             if (status) {
-//                 query = `SELECT * FROM tasks WHERE 1=1 AND USER_ID=? AND status = '${status}'`;
-//             }
-
-//             if (dueDate) {
-//                 const compare = dueDate === 'overdue' ? '<' : '>';
-//                 query = `SELECT * FROM tasks WHERE 1=1 AND USER_ID=? AND STATUS='INCOMPLETE' AND due_date ${compare} NOW()`;
-//             }
-
-//             db.query(query, [userId], (error, data) => {
-//                 if (error) {
-//                     console.error("Error in getFilteredTasks", error);
-//                     return reject(new Error("Failed to retrieve filtered tasks"));
-//                 }
-//                 resolve(data);
-//                 return data;
-//             });
-
-
-//         } catch (error) {
-//             reject(new Error("Failed to retrieve filtered tasks"));
-//         }
-//     });
-// };
 
 // *****************************************************************************
 

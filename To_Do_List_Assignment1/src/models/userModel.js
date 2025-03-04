@@ -41,13 +41,11 @@ const createUser = async (username, password, name, contact_no, email) => {
 const login = (username) => {
     try {
         return new Promise((resolve, reject) => {
-            db.query('SELECT * FROM USERINFO WHERE USERNAME = ?', [username], (error, results) => {
+            db.query("SELECT *FROM USERINFO WHERE USERNAME = ?", username, (error, results) => {
                 if (error) {
                     reject(error);
                 } else {
-
                     resolve(results.length > 0 ? results[0] : null);
-
                 }
             });
         });
