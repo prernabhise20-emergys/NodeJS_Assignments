@@ -41,27 +41,6 @@ const getSpecificTask = async (taskId, userId) => {
   }
 };
 
-// ********************************************************************
-
-const checkIfTaskExists = async (taskInfo) => {
-  try {
-    const result = await new Promise((resolve, reject) => {
-      db.query(
-        "SELECT * FROM tasks WHERE title = ?",taskInfo,(error, results) => {
-          if (error) {
-            return reject(error);
-          }
-          resolve(results);
-        }
-      );
-    });
-
-    return result.length > 0;
-  } catch (error) {
-    throw error;
-  }
-};
-
 // ***************************************************************************
 
 const createNewTask = async (data, userId, email) => {
@@ -207,14 +186,13 @@ const getSearchedTasks = async (userId, column, keyword) => {
 const getFilteredTasks = (column, keyword, status, dueDate, userId) => {
   try {
     return new Promise((resolve, reject) => {
-        
       let query = `SELECT *FROM tasks WHERE IS_DELETED=FALSE AND USER_ID=?`;
 
       if (column && keyword) {
         query += ` AND ${column} LIKE '%${keyword}%'`;
       }
 
-      if (status) {       
+      if (status) {
         query += ` AND status = '${status}'`;
       }
 
@@ -224,8 +202,8 @@ const getFilteredTasks = (column, keyword, status, dueDate, userId) => {
 
       db.query(query, [userId], (error, data) => {
         if (error) {
-            console.log(error);
-            
+          console.log(error);
+
           return reject(error);
         }
         resolve(data);
@@ -235,7 +213,6 @@ const getFilteredTasks = (column, keyword, status, dueDate, userId) => {
     throw error;
   }
 };
-
 
 // *****************************************************************************
 
