@@ -1,4 +1,4 @@
-const TaskModel = require("../models/taskModel");
+const taskModel = require("../models/taskModel");
 const { MESSAGE, STATUS_CODE } = require("../constants/statusConstant");
 
 // ******************************************************************
@@ -6,7 +6,7 @@ const { MESSAGE, STATUS_CODE } = require("../constants/statusConstant");
 const getAllTaskDetails = async (req, res) => {
   try {
     const { id: userId } = req.user;
-    const tasks = await TaskModel.getTasks(userId);
+    const tasks = await taskModel.getTasks(userId);
 
     return res.status(STATUS_CODE.SUCCESS).send({
       status: STATUS_CODE.SUCCESS,
@@ -30,7 +30,7 @@ const getSpecificTaskDetails = async (req, res) => {
     const { id: taskId } = req.params;
     const { id: userId } = req.user;
 
-    const task = await TaskModel.getSpecificTask(taskId, userId);
+    const task = await taskModel.getSpecificTask(taskId, userId);
     if (task.length === 0) {
       return res.status(STATUS_CODE.NOT_FOUND).send({
         status: STATUS_CODE.NOT_FOUND,
@@ -62,7 +62,7 @@ const createNewTask = async (req, res) => {
 
     const { id: USER_ID, email: EMAIL } = req.user;
 
-    const taskExists = await TaskModel.checkIfTaskExists(title);
+    const taskExists = await taskModel.checkIfTaskExists(title,USER_ID);
 
     if (taskExists) {
       return res.status(STATUS_CODE.BAD_REQUEST).send({
@@ -71,7 +71,7 @@ const createNewTask = async (req, res) => {
       });
     }
 
-    const task = await TaskModel.createNewTask(
+    const task = await taskModel.createNewTask(
       { title, description, due_date },
       USER_ID,
       EMAIL
@@ -100,7 +100,7 @@ const updateTask = async (req, res) => {
     const { id: taskId } = req.params;
     const { id: userId } = req.user;
 
-    const taskExists = await TaskModel.checkIfTaskExists(title);
+    const taskExists = await taskModel.checkIfTaskExists(title,userId);
 
     if (taskExists) {
       return res.status(STATUS_CODE.BAD_REQUEST).send({
@@ -109,7 +109,7 @@ const updateTask = async (req, res) => {
       });
     }
 
-    const updateTaskResult = await TaskModel.updateTask(
+    const updateTaskResult = await taskModel.updateTask(
       title,
       description,
       taskId,
@@ -145,7 +145,7 @@ const patchTask = async (req, res) => {
     const { id: taskId } = req.params;
     const { id: userId } = req.user;
 
-    const updateStatusResult = await TaskModel.patchStatus(
+    const updateStatusResult = await taskModel.patchStatus(
       status,
       taskId,
       userId
@@ -180,7 +180,7 @@ const deleteTask = async (req, res) => {
     const { id: userId } = req.user;
     const { id: taskId } = req.params;
 
-    const deleteTask = await TaskModel.deleteTask(taskId, userId);
+    const deleteTask = await taskModel.deleteTask(taskId, userId);
 
     if (deleteTask.affectedRows === 0) {
       res.status(STATUS_CODE.NOT_FOUND).send({
@@ -216,7 +216,7 @@ const sortingTask = async (req, res) => {
       : "CREATED_DATE";
     const sortOrder = sortByOrder.toUpperCase() === "DESC" ? "DESC" : "ASC";
 
-    const tasks = await TaskModel.getSortedTasks(sortField, sortOrder, userId);
+    const tasks = await taskModel.getSortedTasks(sortField, sortOrder, userId);
 
     return res.status(STATUS_CODE.SUCCESS).send({
       status: STATUS_CODE.SUCCESS,
@@ -253,7 +253,7 @@ const searchTasks = async (req, res) => {
         message: MESSAGE.MISSING_KEYWORD_MESSAGE,
       });
     }
-    const tasks = await TaskModel.getSearchedTasks(userId, column, keyword);
+    const tasks = await taskModel.getSearchedTasks(userId, column, keyword);
     if (tasks.length === 0) {
       return res.status(STATUS_CODE.NOT_FOUND).send({
         status: STATUS_CODE.NOT_FOUND,
@@ -292,7 +292,7 @@ const filterTasks = async (req, res) => {
       });
     }
 
-    const tasks = await TaskModel.getFilteredTasks(
+    const tasks = await taskModel.getFilteredTasks(
       column,
       keyword,
       status,

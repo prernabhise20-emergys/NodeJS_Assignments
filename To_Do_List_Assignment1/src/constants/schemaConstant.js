@@ -2,7 +2,7 @@ const Joi = require('joi');
 
 const task_schemas = {
     createTaskSchema: Joi.object({
-        title: Joi.string().min(3).max(255).required().error(new Error("title is required")),
+        title: Joi.string().min(3).max(100).required().error(new Error("title is required")),
         created_date: Joi.date().optional().error(new Error("created_date is in date format")),
         created_by: Joi.string().email().optional().error(new Error("created_by is required")),
         updated_date: Joi.date().optional().error(new Error("updated_date is in date format")),

@@ -43,11 +43,11 @@ const getSpecificTask = async (taskId, userId) => {
 
 // ********************************************************************
 
-const checkIfTaskExists = async (taskInfo) => {
+const checkIfTaskExists = async (taskInfo,userId) => {
   try {
     const result = await new Promise((resolve, reject) => {
       db.query(
-        "SELECT * FROM tasks WHERE title = ?",taskInfo,(error, results) => {
+        "SELECT * FROM tasks WHERE title = ? and user_id=?",[taskInfo,userId],(error, results) => {
           if (error) {
             return reject(error);
           }
@@ -91,7 +91,7 @@ const updateTask = async (title, description, taskId, userId) => {
   try {
     const data = await new Promise((resolve, reject) => {
       db.query(
-        "UPDATE tasks SET TITLE = ? OR DESCRIPTION = ? WHERE ID = ? and USER_ID=?",
+        "UPDATE tasks SET TITLE = ? , DESCRIPTION = ? WHERE ID = ? and USER_ID=?",
         [title, description, taskId, userId],
         (error, result) => {
           if (error) {

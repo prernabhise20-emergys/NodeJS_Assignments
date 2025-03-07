@@ -2,14 +2,13 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const {MESSAGE,STATUS_CODE} = require("../constants/statusConstant")
 const userModel = require('../models/userModel');
-// const { use } = require('../routes/taskRoute');
 require('dotenv').config();
 
 const register = async (req, res) => {
     try {
         const { username, password, name, contact_no, email } = req.body;
         
-    const userExists = await userModel.checkIfUserExists(username, password, contact_no, email);
+    const userExists = await userModel.checkIfUserExists(username);
     if (userExists) {
         return res.status(STATUS_CODE.BAD_REQUEST).send({
           status: STATUS_CODE.BAD_REQUEST,
@@ -84,19 +83,21 @@ const login = async (req, res) => {
 
 const updateUser = async (req, res) => {
     try {
-        const formData = req.body;
-        const { id: uid } = req.user
+        const formData = req.body;        
 
         const userExists = await userModel.checkIfUserExists(formData.username);
 
-        if (userExists) {
+        if (!userExists) {
             return res.status(STATUS_CODE.SERVER_ERROR).send({
                 status: STATUS_CODE.SERVER_ERROR,
                 message:MESSAGE.INVALID_USER_MESSAGE,
             });
         }
+        const { id: uid } = req.user
 
-            const updateUserResult = await userModel.updateUser(formData, uid);
+console.log(uid);
+
+         await userModel.updateUser(formData, uid);
 
         return res.status(STATUS_CODE.SUCCESS).send({
             status: STATUS_CODE.SUCCESS,

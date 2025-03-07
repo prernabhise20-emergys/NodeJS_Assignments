@@ -9,7 +9,6 @@ const bodyValidator = (schema) => {
 
             next(); 
         } catch (err) {
-            console.log('err: ', err);
             res.status(400).json({ error: err.message });  
         }
     };
