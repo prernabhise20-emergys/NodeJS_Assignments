@@ -6,7 +6,7 @@ const getTasks = async (userId) => {
   try {
     const data = await new Promise((resolve, reject) => {
       db.query(
-        "SELECT * FROM tasks WHERE IS_DELETED = FALSE AND USER_ID=?",
+        "SELECT * FROM tasks WHERE IS_DELETED = FALSE AND USER_ID = ? ORDER BY id DESC",
         userId,
         (error, result) => {
           if (error) return reject(error);
@@ -85,13 +85,51 @@ const createNewTask = async (data, userId, email) => {
   }
 };
 
+
 // ******************************************************************
+
+// const updateTask = async (title, description, taskId, userId) => {
+//   try {
+//     const data = await new Promise((resolve, reject) => {
+//       db.query(
+//         "UPDATE tasks SET TITLE = ? , DESCRIPTION = ? WHERE ID = ? and USER_ID=?",
+//         [title, description, taskId, userId],
+//         (error, result) => {
+//           if (error) {
+//             return reject(error);
+//           }
+//           resolve(result);
+//         }
+//       );
+//     });
+
+//     return data;
+//   } catch (error) {
+//     throw error;
+//   }
+// };
+const getTaskStatusById = async (taskId, userId) => {
+  try {
+    return new Promise((resolve, reject) => {
+      const query = "SELECT STATUS FROM TASKS WHERE ID = ? AND USER_ID = ?";
+      
+      db.query(query, [taskId, userId], (error, result) => {
+        if (error) {
+          return reject(error);
+        }
+        resolve(result[0].STATUS);
+      });
+    });
+  } catch (error) {
+    throw error;
+  }
+};
 
 const updateTask = async (title, description, taskId, userId) => {
   try {
     const data = await new Promise((resolve, reject) => {
       db.query(
-        "UPDATE tasks SET TITLE = ? , DESCRIPTION = ? WHERE ID = ? and USER_ID=?",
+        "UPDATE tasks SET TITLE = ? or DESCRIPTION = ? WHERE ID = ? and USER_ID=?",
         [title, description, taskId, userId],
         (error, result) => {
           if (error) {
@@ -108,9 +146,11 @@ const updateTask = async (title, description, taskId, userId) => {
   }
 };
 
+
+
 // **********************************************************************
 
-const patchStatus = async (status, taskId, userId) => {
+const updateStatus = async (status, taskId, userId) => {
   try {
     const data = await new Promise((resolve, reject) => {
       db.query(
@@ -244,10 +284,12 @@ module.exports = {
   getSpecificTask,
   checkIfTaskExists,
   createNewTask,
+  getTaskStatusById,
   updateTask,
   deleteTask,
   getSortedTasks,
   getSearchedTasks,
-  patchStatus,
+  updateStatus,
   getFilteredTasks,
 };
+

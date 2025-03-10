@@ -10,7 +10,7 @@ const getAllTaskDetails = async (req, res) => {
 
     return res.status(STATUS_CODE.SUCCESS).send({
       status: STATUS_CODE.SUCCESS,
-      message: MESSAGE.SUCCESS_MESSAGE,
+      message: MESSAGE.GET_TASK_MESSAGE,
       data: tasks,
     });
   } catch (error) {
@@ -34,12 +34,12 @@ const getSpecificTaskDetails = async (req, res) => {
     if (task.length === 0) {
       return res.status(STATUS_CODE.NOT_FOUND).send({
         status: STATUS_CODE.NOT_FOUND,
-        message: MESSAGE.NOT_FOUND_MESSAGE,
+        message: MESSAGE.TASKNOT_FOUND_MESSAGE,
       });
     }
     res.status(STATUS_CODE.SUCCESS).send({
       status: STATUS_CODE.SUCCESS,
-      message: MESSAGE.SUCCESS_MESSAGE,
+      message: MESSAGE.GET_TASK_MESSAGE,
       data: task,
     });
   } catch (error) {
@@ -54,6 +54,7 @@ const getSpecificTaskDetails = async (req, res) => {
 
 // ***********************************************************
 
+
 const createNewTask = async (req, res) => {
   try {
     const {
@@ -62,25 +63,16 @@ const createNewTask = async (req, res) => {
 
     const { id: USER_ID, email: EMAIL } = req.user;
 
-    const taskExists = await taskModel.checkIfTaskExists(title,USER_ID);
-
-    if (taskExists) {
-      return res.status(STATUS_CODE.BAD_REQUEST).send({
-        status: STATUS_CODE.BAD_REQUEST,
-        message: MESSAGE.DUPLICATE_ERROR_MESSAGE,
-      });
+    const taskData = { title, due_date };
+    if (description) {
+      taskData.description = description;
     }
 
-    const task = await taskModel.createNewTask(
-      { title, description, due_date },
-      USER_ID,
-      EMAIL
-    );
+     await taskModel.createNewTask(taskData, USER_ID, EMAIL);
 
     res.status(STATUS_CODE.CREATED).send({
       status: STATUS_CODE.CREATED,
-      message: MESSAGE.CREATED_MESSAGE,
-      data: task,
+      message: MESSAGE.TASK_CREATED_MESSAGE,
     });
   } catch (error) {
     console.error(error.message);
@@ -92,6 +84,7 @@ const createNewTask = async (req, res) => {
   }
 };
 
+
 // **************************************************************
 
 const updateTask = async (req, res) => {
@@ -100,12 +93,12 @@ const updateTask = async (req, res) => {
     const { id: taskId } = req.params;
     const { id: userId } = req.user;
 
-    const taskExists = await taskModel.checkIfTaskExists(title,userId);
+    const taskStatus = await taskModel.getTaskStatusById(taskId, userId);
 
-    if (taskExists) {
-      return res.status(STATUS_CODE.BAD_REQUEST).send({
-        status: STATUS_CODE.BAD_REQUEST,
-        message: MESSAGE.DUPLICATE_ERROR_MESSAGE,
+    if (taskStatus === 'complete') {
+      return res.status(STATUS_CODE.FORBIDDEN).send({
+        status: STATUS_CODE.FORBIDDEN,
+        message: MESSAGE.TASK_ALREADY_COMPLETED,
       });
     }
 
@@ -118,14 +111,14 @@ const updateTask = async (req, res) => {
 
     if (updateTaskResult.affectedRows === 0) {
       return res.status(STATUS_CODE.NOT_FOUND).send({
-        STATUS_CODE: STATUS_CODE.NOT_FOUND,
-        message: MESSAGE.NOT_FOUND_MESSAGE,
+        status: STATUS_CODE.NOT_FOUND,
+        message: MESSAGE.TASK_NOT_UPDATED,
       });
     }
 
     return res.status(STATUS_CODE.SUCCESS).send({
       status: STATUS_CODE.SUCCESS,
-      message: MESSAGE.SUCCESS_MESSAGE,
+      message: MESSAGE.TASK_UPDATED_MESSAGE,
     });
   } catch (error) {
     console.error(error.message);
@@ -137,15 +130,16 @@ const updateTask = async (req, res) => {
   }
 };
 
+
 // ********************************************************************
 
-const patchTask = async (req, res) => {
+const updateStatus = async (req, res) => {
   try {
     const { status } = req.body;
     const { id: taskId } = req.params;
     const { id: userId } = req.user;
 
-    const updateStatusResult = await taskModel.patchStatus(
+    const updateStatusResult = await taskModel.updateStatus(
       status,
       taskId,
       userId
@@ -154,13 +148,12 @@ const patchTask = async (req, res) => {
     if (updateStatusResult.affectedRows === 0) {
       res.status(STATUS_CODE.NOT_FOUND).send({
         status: STATUS_CODE.NOT_FOUND,
-        message: MESSAGE.NOT_FOUND_MESSAGE,
+        message: MESSAGE.TASK_STATUSNOT_UPDATED_MESSAGE,
       });
     }
     return res.status(STATUS_CODE.SUCCESS).send({
       status: STATUS_CODE.SUCCESS,
-      message: MESSAGE.SUCCESS_MESSAGE,
-      data: updateStatusResult,
+      message: MESSAGE.UPDATE_STATUS_MESSAGE,
     });
   } catch (error) {
     console.error(error.message);
@@ -185,12 +178,12 @@ const deleteTask = async (req, res) => {
     if (deleteTask.affectedRows === 0) {
       res.status(STATUS_CODE.NOT_FOUND).send({
         status: STATUS_CODE.NOT_FOUND,
-        message: MESSAGE.NOT_FOUND_MESSAGE,
+        message: MESSAGE.NOT_DELETE_MESSAGE,
       });
     }
     return res.status(STATUS_CODE.SUCCESS).send({
       status: STATUS_CODE.SUCCESS,
-      message: MESSAGE.SUCCESS_MESSAGE,
+      message: MESSAGE.TASK_DELETE_MESSAGE,
     });
   } catch (error) {
     console.error(error.message);
@@ -220,7 +213,7 @@ const sortingTask = async (req, res) => {
 
     return res.status(STATUS_CODE.SUCCESS).send({
       status: STATUS_CODE.SUCCESS,
-      message: MESSAGE.SUCCESS_MESSAGE,
+      message: MESSAGE.SORTED_TASK_MESSAGE,
       data: tasks,
     });
   } catch (error) {
@@ -257,12 +250,12 @@ const searchTasks = async (req, res) => {
     if (tasks.length === 0) {
       return res.status(STATUS_CODE.NOT_FOUND).send({
         status: STATUS_CODE.NOT_FOUND,
-        message: MESSAGE.NOT_FOUND_MESSAGE,
+        message: MESSAGE.TASKNOT_FOUND_MESSAGE,
       });
     } else {
       return res.status(STATUS_CODE.SUCCESS).send({
         status: STATUS_CODE.SUCCESS,
-        message: MESSAGE.SUCCESS_MESSAGE,
+        message: MESSAGE.TASK_SEARCHING_MESSAGE,
         data: tasks,
       });
     }
@@ -288,7 +281,7 @@ const filterTasks = async (req, res) => {
     if (column && !["title", "description"].includes(column)) {
       return res.status(STATUS_CODE.NOT_FOUND).send({
         status: STATUS_CODE.NOT_FOUND,
-        message: MESSAGE.NOT_FOUND_MESSAGE,
+        message: MESSAGE.INVALID_COLUMN_MESSAGE,
       });
     }
 
@@ -301,7 +294,7 @@ const filterTasks = async (req, res) => {
     );
     return res.status(STATUS_CODE.SUCCESS).send({
       status: STATUS_CODE.SUCCESS,
-      message: MESSAGE.SUCCESS_MESSAGE,
+      message: MESSAGE.FILTER_TASK_MESSAGE,
       data: tasks,
     });
   } catch (error) {
@@ -325,6 +318,7 @@ module.exports = {
   getSpecificTaskDetails,
   sortingTask,
   searchTasks,
-  patchTask,
+  updateStatus,
   filterTasks,
 };
+
