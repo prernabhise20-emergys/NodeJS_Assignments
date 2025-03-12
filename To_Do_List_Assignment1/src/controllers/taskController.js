@@ -116,12 +116,6 @@ const updateTask = async (req, res) => {
     if (description) dataset.description = description;
     if (due_date) dataset.due_date = due_date;
 
-    if (Object.keys(dataset).length === 0) {
-      throw {
-        status: ERROR_STATUS_CODE.BAD_REQUEST,
-        message: ERROR_MESSAGE.NO_DATA_TO_UPDATE,
-      };
-    }
 
     const updateTaskResult = await taskModel.updateTask(
       dataset,
@@ -192,7 +186,7 @@ const deleteTask = async (req, res) => {
 
     const deleteTask = await taskModel.deleteTask(taskId, userId);
 
-    if (deleteTask) {
+    if (!deleteTask) {
       throw {
         status: ERROR_STATUS_CODE.NOT_FOUND,
         message: ERROR_MESSAGE.NOT_DELETE_MESSAGE,
@@ -309,3 +303,5 @@ module.exports = {
   updateStatus,
   filterTasks,
 };
+
+
