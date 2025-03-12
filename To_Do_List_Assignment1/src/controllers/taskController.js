@@ -88,74 +88,12 @@ const createNewTask = async (req, res) => {
 
 // **************************************************************
 
-// const updateTask = async (req, res) => {
-//   try {
-//     const { title, description,due_date } = req.body;
-//     const { id: taskId } = req.params;
-//     const { id: userId } = req.user;
-
-//     const taskExists = await taskModel.checkIfTaskExists(title, due_date, userId);
-
-//     if (taskExists) {
-//       throw{
-//         status: ERROR_STATUS_CODE.BAD_REQUEST,
-//         message: ERROR_MESSAGE.DUPLICATE_ERROR_MESSAGE,
-//       };
-//     }
-  
-//     const taskStatus = await taskModel.getTaskStatusById(taskId, userId);
-
-//     if (taskStatus === 'complete') {
-//       throw{
-//         status: ERROR_STATUS_CODE.FORBIDDEN,
-//         message: ERROR_MESSAGE.TASK_ALREADY_COMPLETED,
-//       };
-//     }
-
-//     const data={title,
-//       description,
-//       due_date,}
-//     const updateTaskResult = await taskModel.updateTask(
-//       data,
-//       taskId,
-//       userId
-//     );
-
-//     if (updateTaskResult) {
-//       throw{
-//         status: ERROR_STATUS_CODE.NOT_FOUND,
-//         message: ERROR_MESSAGE.TASK_NOT_UPDATED,
-//       };
-//     }
-
-//     return res.status(SUCCESS_STATUS_CODE.SUCCESS).send({
-//       status: SUCCESS_STATUS_CODE.SUCCESS,
-//       message: SUCCESS_MESSAGE.TASK_UPDATED_MESSAGE,
-//     });
-//   } catch (error) {
-//     console.error(error.message);
-//     return res.status(error.status||ERROR_STATUS_CODE.SERVER_ERROR).send({
-//       status: error.status||ERROR_STATUS_CODE.SERVER_ERROR,
-//       message:error.message || ERROR_MESSAGE.SERVER_ERROR_MESSAGE,
-//     });
-//   }
-// };
 const updateTask = async (req, res) => {
   try {
     const { title, description, due_date } = req.body;
     const { id: taskId } = req.params;
     const { id: userId } = req.user;
 
-  //   if(description===null){
-  //   const taskExists = await taskModel.checkIfTaskExists(title, due_date, userId);
-
-  //   if (taskExists) {
-  //     throw {
-  //       status: ERROR_STATUS_CODE.BAD_REQUEST,
-  //       message: ERROR_MESSAGE.DUPLICATE_ERROR_MESSAGE,
-  //     };
-  //   }
-  // }
     const taskStatus = await taskModel.getTaskStatusById(taskId, userId);
 
     if (taskStatus === 'complete') {

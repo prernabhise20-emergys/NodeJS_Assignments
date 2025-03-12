@@ -91,26 +91,6 @@ const createNewTask = async (data, userId, email) => {
 
 // ******************************************************************
 
-// const updateTask = async (title, description, taskId, userId) => {
-//   try {
-//     const data = await new Promise((resolve, reject) => {
-//       db.query(
-//         "UPDATE tasks SET TITLE = ? , DESCRIPTION = ? WHERE ID = ? and USER_ID=?",
-//         [title, description, taskId, userId],
-//         (error, result) => {
-//           if (error) {
-//             return reject(error);
-//           }
-//           resolve(result);
-//         }
-//       );
-//     });
-
-//     return data;
-//   } catch (error) {
-//     throw error;
-//   }
-// };
 const getTaskStatusById = async (taskId, userId) => {
   try {
     return new Promise((resolve, reject) => {
@@ -128,27 +108,6 @@ const getTaskStatusById = async (taskId, userId) => {
   }
 };
 
-// const updateTask = async (dataset, taskId, userId) => {
-//   try {
-
-//     const data = await new Promise((resolve, reject) => {
-//       db.query(
-//         "UPDATE tasks SET ? WHERE ID = ? and USER_ID=?",
-//         [dataset, taskId, userId],
-//         (error, result) => {
-//           if (error) {
-//             return reject(error);
-//           }
-//           resolve(result);
-//         }
-//       );
-//     });
-
-//     return data;
-//   } catch (error) {
-//     throw error;
-//   }
-// };
 
 const updateTask = async (dataset, taskId, userId) => {
   try {
