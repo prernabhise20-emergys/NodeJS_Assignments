@@ -1,8 +1,8 @@
-import { MESSAGE, STATUS_CODE } from "../constants/statusConstant.js";
-import { uploadFile } from '../services/upload.js';
+import { MESSAGE, STATUS_CODE } from "../common/constants/statusConstant.js";
+import { uploadFile } from "../common/utility/upload.js";
 
 import {
-  personalDetails,
+  createPersonalDetails,
   updatePersonalDetails,
   getInfo,
   deletePersonalDetails,
@@ -17,19 +17,18 @@ import {
   saveDocument,
   checkPersonalInfo,
   checkFamilyInfo,
-  checkDiseaseInfo
+  checkDiseaseInfo,
 } from "../models/patientModel.js";
 
 const getAllInfo = async (req, res) => {
   try {
     const { admin: is_admin } = req.user;
-    const { uid: id } = req.user;
 
     if (!is_admin) {
-      return res.status(STATUS_CODE.INVALID).send({
+      throw{
         status: STATUS_CODE.INVALID,
         message: MESSAGE.UNAUTHORIZED_ACCESS_MESSAGE,
-      });
+      };
     }
 
     let { page = 1 } = req.query;
@@ -37,11 +36,13 @@ const getAllInfo = async (req, res) => {
     const limit = 10;
     const offset = (page - 1) * limit;
 
-    const personalInfo = await getInfo(id, is_admin, limit, offset);
+    console.log( is_admin, limit, offset);
+    
+    const personalInfo = await getInfo(is_admin, limit, offset);
 
     return res.status(STATUS_CODE.SUCCESS).send({
       status: STATUS_CODE.SUCCESS,
-      message: MESSAGE.RETRIVEINFO_SUCCESS_MESSAGE,
+      message: MESSAGE.RETRIEVE_INFO_SUCCESS_MESSAGE,
       data: personalInfo,
       pagination: {
         currentPage: page,
@@ -50,15 +51,14 @@ const getAllInfo = async (req, res) => {
     });
   } catch (error) {
     console.error(error.message);
-    return res.status(STATUS_CODE.ERROR).send({
-      status: STATUS_CODE.ERROR,
-      message:error.message|| MESSAGE.SERVER_ERROR_MESSAGE,
+    return res.status(error.status ||STATUS_CODE.ERROR).send({
+      status:error.status || STATUS_CODE.ERROR,
+      message: error.message || MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
 
-
-const personalInfo = async (req, res) => {
+const createPersonalInfo = async (req, res) => {
   try {
     const {
       body: {
@@ -72,7 +72,7 @@ const personalInfo = async (req, res) => {
       },
     } = req;
 
-    const { uid: id, email: email } = req.user;
+    const { userid: id, email: email } = req.user;
     const data = {
       date_of_birth,
       weight,
@@ -83,18 +83,25 @@ const personalInfo = async (req, res) => {
       blood_pressure,
     };
 
-    const users = await personalDetails(data, id, email);
+    const idExists = await checkPersonalInfo(id);
+    if (idExists) {
+      throw{
+        status: STATUS_CODE.BAD_REQUEST,
+        message: MESSAGE.PERSONAL_INFO_EXISTS,
+      };
+    }
+    const users = await createPersonalDetails(data, id, email);
 
-    res.status(STATUS_CODE.CREATED).send({
+    throw{
       status: STATUS_CODE.CREATED,
-      message: MESSAGE.ADDED_PERSONALINFO_MESSAGE,
+      message: MESSAGE.ADDED_PERSONAL_INFO_MESSAGE,
       data: users,
-    });
+    };
   } catch (error) {
     console.error(error.message);
-    return res.status(STATUS_CODE.SERVER_ERROR).send({
-      status: STATUS_CODE.SERVER_ERROR,
-      message: error.message||MESSAGE.SERVER_ERROR_MESSAGE,
+    return res.status(error.status ||STATUS_CODE.SERVER_ERROR).send({
+      status:error.status || STATUS_CODE.SERVER_ERROR,
+      message: error.message || MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -112,7 +119,7 @@ const updatePersonalInfo = async (req, res) => {
         blood_pressure,
       },
     } = req;
-    const { uid: id } = req.user;
+    const { userid: id, admin: is_admin } = req.user;
     const data = {
       date_of_birth,
       weight,
@@ -123,32 +130,48 @@ const updatePersonalInfo = async (req, res) => {
       blood_pressure,
     };
 
-    const updateInfo = await updatePersonalDetails(data, id);
-
-    if (updateInfo.affectedRows === 0) {
-      return res.status(STATUS_CODE.NOT_FOUND).send({
-        STATUS_CODE: STATUS_CODE.NOT_FOUND,
-        message: MESSAGE.NOT_UPDATE_MESSAGE,
+    if (req.user.userid !== id && !is_admin) {
+      return res.status(STATUS_CODE.FORBIDDEN).send({
+        status: STATUS_CODE.FORBIDDEN,
+        message: MESSAGE.FORBIDDEN_MESSAGE,
       });
     }
 
+    if(req.user.userid == id || is_admin){
+    const updateInfo = await updatePersonalDetails(data, id);
+    
+    if (updateInfo.affectedRows === 0) {
+      throw {
+        STATUS_CODE: STATUS_CODE.NOT_FOUND,
+        message: MESSAGE.NOT_UPDATE_MESSAGE,
+      };
+    }
+  }
     return res.status(STATUS_CODE.SUCCESS).send({
       status: STATUS_CODE.SUCCESS,
-      message: MESSAGE.UPDATEINFO_SUCCESS_MESSAGE,
+      message: MESSAGE.UPDATE_INFO_SUCCESS_MESSAGE,
     });
   } catch (error) {
     console.error(error.message);
-    return res.status(STATUS_CODE.SERVER_ERROR).send({
-      status: STATUS_CODE.SERVER_ERROR,
-      message: error.message||MESSAGE.SERVER_ERROR_MESSAGE,
+    return res.status(error.status || STATUS_CODE.SERVER_ERROR).send({
+      status: error.status || STATUS_CODE.SERVER_ERROR,
+      message: error.message || MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
 
 const deletePersonalInfo = async (req, res) => {
   try {
-    const { uid: id } = req.user;
+    const { userid: id, admin: is_admin } = req.user;
 
+    if (req.user.userid !== id && !is_admin) {
+      return res.status(STATUS_CODE.FORBIDDEN).send({
+        status: STATUS_CODE.FORBIDDEN,
+        message: MESSAGE.FORBIDDEN_MESSAGE,
+      });
+    }
+
+    if(req.user.userid == id || is_admin){
     const deleteTask = await deletePersonalDetails(id);
 
     if (deleteTask.affectedRows === 0) {
@@ -156,21 +179,20 @@ const deletePersonalInfo = async (req, res) => {
         status: STATUS_CODE.NOT_FOUND,
         message: MESSAGE.NOT_DELETE_MESSAGE,
       });
-    }
-    return res.status(STATUS_CODE.SUCCESS).send({
+    }}
+    throw{
       status: STATUS_CODE.SUCCESS,
       message: MESSAGE.DELETE_SUCCESS_MESSAGE,
-    });
+    };
   } catch (error) {
     console.error(error.message);
 
-    return res.status(STATUS_CODE.SERVER_ERROR).send({
-      status: STATUS_CODE.SERVER_ERROR,
-      message: error.message ||MESSAGE.SERVER_ERROR_MESSAGE,
+    return res.status(error.status ||STATUS_CODE.SERVER_ERROR).send({
+      status: error.status ||STATUS_CODE.SERVER_ERROR,
+      message: error.message || MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
-
 
 // *************************************************************************
 
@@ -189,15 +211,23 @@ const addFamilyInfo = async (req, res) => {
         parent_bp,
       },
     } = req;
-    const { uid: id, email } = req.user;
+    const { userid: id, email } = req.user;
 
     console.log(id);
 
+    const idExists= await checkFamilyInfo(id);
+    if (idExists) {
+      throw{
+        status: STATUS_CODE.INVALID,
+        message: MESSAGE.FAMILY_INFO_EXISTS,
+      };
+    }
+
     const personalExists = await checkPersonalInfo(id);
     if (!personalExists) {
-      return res.send({message: 'Please fill personal info first.' });
+      throw{ message: "Please fill personal info first." };
     }
-  
+
     const familyData = {
       father_name,
       father_age,
@@ -211,35 +241,35 @@ const addFamilyInfo = async (req, res) => {
     };
 
     const result = await insertFamilyInfo(familyData, id, email);
-    return res.status(STATUS_CODE.CREATED).send({
+    throw{
       status: STATUS_CODE.CREATED,
       message: MESSAGE.ADDED_FAMILY_MESSAGE,
       data: result,
-    });
+    }
   } catch (error) {
     console.error(error.message);
-    return res.status(STATUS_CODE.SERVER_ERROR).send({
-      status: STATUS_CODE.SERVER_ERROR,
-      message: error.message ||MESSAGE.SERVER_ERROR_MESSAGE,
+    return res.status(error.status ||STATUS_CODE.SERVER_ERROR).send({
+      status: error.status ||STATUS_CODE.SERVER_ERROR,
+      message: error.message || MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
 
 const getFamilyDetails = async (req, res) => {
   try {
-    const { uid: id } = req.user;
+    const { userid: id } = req.user;
     const familyInfo = await getFamilyInfo(id);
 
-    return res.status(STATUS_CODE.SUCCESS).send({
+    return res.status( STATUS_CODE.SUCCESS).send({
       status: STATUS_CODE.SUCCESS,
-      message: MESSAGE.GET_FAMILYINFO_MESSAGE,
+      message: MESSAGE.GET_FAMILY_INFO_MESSAGE,
       data: familyInfo,
     });
   } catch (error) {
     console.error(error.message);
-    return res.status(STATUS_CODE.ERROR).send({
-      status: STATUS_CODE.ERROR,
-      message: error.message ||MESSAGE.SERVER_ERROR_MESSAGE,
+    return res.status(error.status ||STATUS_CODE.ERROR).send({
+      status: error.status ||STATUS_CODE.ERROR,
+      message: error.message || MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -259,7 +289,7 @@ const updateFamilyInfoDetails = async (req, res) => {
         parent_bp,
       },
     } = req;
-    const { uid: id } = req.user;
+    const { userid: id } = req.user;
 
     const familyData = {
       father_name,
@@ -276,20 +306,20 @@ const updateFamilyInfoDetails = async (req, res) => {
     const result = await updateFamilyInfo(familyData, id);
 
     if (result.affectedRows === 0) {
-      return res.status(STATUS_CODE.BAD_REQUEST).send({
+      throw{
         status: STATUS_CODE.BAD_REQUEST,
         message: MESSAGE.NOT_UPDATE_MESSAGE,
-      });
+      };
     }
 
-    return res.status(STATUS_CODE.SUCCESS).send({
+    throw{
       status: STATUS_CODE.SUCCESS,
-      message: MESSAGE.UPDATEINFO_SUCCESS_MESSAGE,
-    });
+      message: MESSAGE.UPDATE_INFO_SUCCESS_MESSAGE,
+    };
   } catch (error) {
     console.error(error.message);
-    return res.status(STATUS_CODE.SERVER_ERROR).send({
-      status: STATUS_CODE.SERVER_ERROR,
+    return res.status(error.status ||STATUS_CODE.SERVER_ERROR).send({
+      status: error.status ||STATUS_CODE.SERVER_ERROR,
       message: error.message || MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
@@ -297,26 +327,26 @@ const updateFamilyInfoDetails = async (req, res) => {
 
 const deleteFamilyInfoDetails = async (req, res) => {
   try {
-    const { uid: id } = req.user;
+    const { userid: id } = req.user;
 
     const result = await deleteFamilyInfo(id);
 
     if (result.affectedRows === 0) {
-      return res.status(STATUS_CODE.BAD_REQUEST).send({
+      throw{
         status: STATUS_CODE.BAD_REQUEST,
         message: MESSAGE.NOT_DELETE_MESSAGE,
-      });
+      };
     }
 
-    return res.status(STATUS_CODE.SUCCESS).send({
+    throw{
       status: STATUS_CODE.SUCCESS,
       message: MESSAGE.DELETE_SUCCESS_MESSAGE,
-    });
+    };
   } catch (error) {
     console.error(error.message);
-    return res.status(STATUS_CODE.SERVER_ERROR).send({
-      status: STATUS_CODE.SERVER_ERROR,
-      message: error.message ||MESSAGE.SERVER_ERROR_MESSAGE,
+    return res.status(error.status ||STATUS_CODE.SERVER_ERROR).send({
+      status:error.status || STATUS_CODE.SERVER_ERROR,
+      message: error.message || MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -325,9 +355,9 @@ const deleteFamilyInfoDetails = async (req, res) => {
 
 const getDiseaseDetails = async (req, res) => {
   try {
-    const { admin: is_admin } = req.user; 
-    const { uid: id } = req.user; 
-    const personalInfo = await getDiseaseInfo(id, is_admin);
+    const { admin: is_admin } = req.user;
+    // const { userid: id } = req.user;
+    const personalInfo = await getDiseaseInfo(is_admin);
 
     return res.status(STATUS_CODE.SUCCESS).send({
       status: STATUS_CODE.SUCCESS,
@@ -336,42 +366,48 @@ const getDiseaseDetails = async (req, res) => {
     });
   } catch (error) {
     console.error(error.message);
-    return res.status(STATUS_CODE.ERROR).send({
-      status: STATUS_CODE.ERROR,
+    return res.status(error.status ||STATUS_CODE.ERROR).send({
+      status: error.status ||STATUS_CODE.ERROR,
       message: error.message || MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
-
-
 
 const addDiseaseInfo = async (req, res) => {
   try {
     const {
       body: { disease_type, disease_description },
     } = req;
-    const { uid: id, email } = req.user;
+    const { userid: id } = req.user;
+
+    const idExists= await checkDiseaseInfo(id);
+    if (idExists) {
+      throw{
+        status: STATUS_CODE.INVALID,
+        message: MESSAGE.DISEASE_INFO_EXISTS,
+      };
+    }
     const familyExists = await checkFamilyInfo(id);
     if (!familyExists) {
-      return res.send({ message: 'Please fill family info next.' });
+      throw{ message: MESSAGE.FAMILY_STEP };
     }
-    
+
     const diseaseData = {
       disease_type,
       disease_description,
     };
 
     const result = await addDiseaseData(diseaseData, id);
-    return res.status(STATUS_CODE.CREATED).send({
+    throw{
       status: STATUS_CODE.CREATED,
-      message: MESSAGE.CREATED_DISEASEINFO_MESSAGE,
+      message: MESSAGE.CREATED_DISEASE_INFO_MESSAGE,
       data: result,
-    });
+    };
   } catch (error) {
     console.error(error.message);
-    return res.status(STATUS_CODE.SERVER_ERROR).send({
-      status: STATUS_CODE.SERVER_ERROR,
-      message:  error.message || MESSAGE.SERVER_ERROR_MESSAGE,
+    return res.status(error.status ||STATUS_CODE.SERVER_ERROR).send({
+      status: error.status ||STATUS_CODE.SERVER_ERROR,
+      message: error.message || MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -381,42 +417,42 @@ const updateDiseaseInfo = async (req, res) => {
     const {
       body: { disease_type, disease_description },
     } = req;
-    const { uid: id } = req.user;
+    const { userid: id } = req.user;
 
     const formData = { disease_type, disease_description };
 
     const result = await updateDiseaseDetails(formData, id);
 
-    return res.status(STATUS_CODE.SUCCESS).send({
+    throw{
       status: STATUS_CODE.SUCCESS,
-      message: MESSAGE.UPDATEINFO_SUCCESS_MESSAGE,
+      message: MESSAGE.UPDATE_INFO_SUCCESS_MESSAGE,
       data: result,
-    });
+    }
   } catch (error) {
     console.error(error.message);
-    return res.status(STATUS_CODE.SERVER_ERROR).send({
-      status: STATUS_CODE.SERVER_ERROR,
-      message:error.message || MESSAGE.SERVER_ERROR_MESSAGE,
+    return res.status(error.status ||STATUS_CODE.SERVER_ERROR).send({
+      status:error.status || STATUS_CODE.SERVER_ERROR,
+      message: error.message || MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
 
 const deleteDiseaseInfo = async (req, res) => {
   try {
-    const { uid: id } = req.user;
+    const { userid: id } = req.user;
 
     const deleteUser = await deleteDiseaseDetails(id);
 
-    return res.status(STATUS_CODE.SUCCESS).send({
+    throw{
       status: STATUS_CODE.SUCCESS,
       message: MESSAGE.DELETE_SUCCESS_MESSAGE,
       user: deleteUser,
-    });
+    }
   } catch (error) {
     console.error(error.message);
-    return res.status(STATUS_CODE.SERVER_ERROR).send({
-      status: STATUS_CODE.SERVER_ERROR,
-      message: error.message ||MESSAGE.SERVER_ERROR_MESSAGE,
+    return res.status(error.status || STATUS_CODE.SERVER_ERROR).send({
+      status: error.status || STATUS_CODE.SERVER_ERROR,
+      message: error.message || MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -424,91 +460,63 @@ const deleteDiseaseInfo = async (req, res) => {
 // **************************************************************************
 
 const uploadDocument = async (req, res) => {
+  try {
+
   console.log(" Received File:", req.file);
-  console.log(" Received Body:", req.body);
 
   if (!req.file) {
-    return res.status(STATUS_CODE.NOT_FOUND).send({
-      status:STATUS_CODE.NOT_FOUND,
-       message: MESSAGE.NO_FILE 
-      });
+    throw {
+      status: STATUS_CODE.NOT_FOUND,
+      message: MESSAGE.NO_FILE,
+    };
   }
+  const { userid: id } = req.user;
 
-  const { document_type, user_id } = req.body;
-  const diseaseExists = await checkDiseaseInfo(user_id);
+  const { document_type } = req.body;
+  
+  const diseaseExists = await checkDiseaseInfo(id);
   if (!diseaseExists) {
-    return res.send({  message: 'Please fill disease info first.' });
+    throw{
+      message: MESSAGE.DISEASE_STEP,
+    };
   }
 
-
-  if (!document_type || !user_id) {
-    return res.status(STATUS_CODE.NOT_FOUND).send({
-      status:STATUS_CODE.NOT_FOUND,
-       message: MESSAGE.MISSING_REQUIRED 
-      });
+  if (!document_type || !id) {
+    throw {
+      status: STATUS_CODE.NOT_FOUND,
+      message: MESSAGE.MISSING_REQUIRED,
+    };
   }
 
-  try {
     const result = await uploadFile(req.file);
-    const documentUrl = result.secure_url;  
+    const { secure_url: documentUrl } = result;
 
     const documentData = {
       document_type,
       document_url: documentUrl,
-      user_id,
     };
 
-    await saveDocument(documentData);
+    await saveDocument(documentData,id);
 
     return res.status(STATUS_CODE.CREATED).send({
-      status:STATUS_CODE.CREATED,
-      message:MESSAGE.DOCUMENT_UPLOAD,
-      document_url: documentUrl, 
+      status: STATUS_CODE.CREATED,
+      message: MESSAGE.DOCUMENT_UPLOAD,
+      document_url: documentUrl,
     });
-
   } catch (error) {
     console.error(error.message);
-    return res.status(STATUS_CODE.SERVER_ERROR).send({
-      status: STATUS_CODE.SERVER_ERROR,
-      message: error.message ||MESSAGE.SERVER_ERROR_MESSAGE,
-    });
-  }
-};
-
-
-// ***********************************************************************
-const checkUserSequence = async (req, res) => {
-  try {
-    const { uid: userId } = req.user;
-    
-    const progress = await checkUserProgress(userId);
-
-    if (progress.step !== 'completed') {
-      return res.status(STATUS_CODE.BAD_REQUEST).send({
-        status: STATUS_CODE.BAD_REQUEST,
-        message: progress.message,
-      });
-    }
-
-    return res.status(STATUS_CODE.SUCCESS).send({
-      status: STATUS_CODE.SUCCESS,
-      message: MESSAGE.PROGRESS_COMPLETE,
-    });
-
-  } catch (error) {
-    console.error(error.message);
-    return res.status(STATUS_CODE.SERVER_ERROR).send({
-      status: STATUS_CODE.SERVER_ERROR,
+    return res.status(error.status || STATUS_CODE.SERVER_ERROR).send({
+      status: error.status || STATUS_CODE.SERVER_ERROR,
       message: error.message || MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
 
+// ***********************************************************************
 
 export default {
   uploadDocument,
-checkUserSequence,
-  personalInfo,
+  createPersonalInfo,
   updatePersonalInfo,
   getDiseaseDetails,
   getAllInfo,
@@ -520,5 +528,4 @@ checkUserSequence,
   addDiseaseInfo,
   updateDiseaseInfo,
   deleteDiseaseInfo,
-
 };

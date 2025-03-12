@@ -1,7 +1,7 @@
 import express from 'express';
 import userController from '../controllers/userController.js';  
 import { schemaValidator } from '../middlewares/userValidation.js';
-import { user_schemas } from '../constants/schemaConstant.js';
+import { user_schemas } from '../common/constants/schemaConstant.js';
 import authenticateUser  from '../middlewares/authMiddleware.js';
 const router = express.Router();
 

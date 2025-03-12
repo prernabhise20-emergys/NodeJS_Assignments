@@ -1,13 +1,13 @@
 import express from 'express';
 import patientController from '../controllers/patientController.js';  
 import { schemaValidator } from '../middlewares/userValidation.js';
-import { user_schemas } from '../constants/schemaConstant.js';
+import { user_schemas } from '../common/constants/schemaConstant.js';
 import authenticateUser  from '../middlewares/authMiddleware.js';
-import { upload } from '../services/upload.js';
+import { upload } from '../config/uploadDocument.js';
 const router = express.Router();
 
 router.get('/getInfo', authenticateUser, patientController.getAllInfo);
-router.post('/personalInfo',authenticateUser, schemaValidator(user_schemas.createPersonalInfo), patientController.personalInfo);
+router.post('/personalInfo',authenticateUser, schemaValidator(user_schemas.createPersonalInfo), patientController.createPersonalInfo);
 router.put('/updatePersonalInfo',authenticateUser,schemaValidator(user_schemas.updatePersonalInfo), patientController.updatePersonalInfo);
 router.delete('/deleteInfo', authenticateUser, patientController.deletePersonalInfo);
 

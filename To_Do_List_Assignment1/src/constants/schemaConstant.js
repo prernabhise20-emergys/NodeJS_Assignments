@@ -33,7 +33,7 @@ const task_schemas = {
     title: Joi.string()
       .min(3)
       .max(255)
-      .required()
+      .optional()
       .error(
         new Error("title is in string format and min 3 letter are required")
       ),
@@ -47,7 +47,7 @@ const task_schemas = {
       .optional()
       .error(new Error("updated_by is in string format")),
     description: Joi.string()
-      .required()
+      .optional()
       .error(new Error("description is required")),
     status: Joi.string()
       .optional()

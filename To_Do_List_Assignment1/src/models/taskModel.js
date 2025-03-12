@@ -43,11 +43,14 @@ const getSpecificTask = async (taskId, userId) => {
 
 // ********************************************************************
 
-const checkIfTaskExists = async (taskInfo,userId) => {
+const checkIfTaskExists = async (title, due_date, userId) => {
   try {
     const result = await new Promise((resolve, reject) => {
+      
       db.query(
-        "SELECT * FROM tasks WHERE title = ? and user_id=?",[taskInfo,userId],(error, results) => {
+        "SELECT * FROM tasks WHERE title = ? AND due_date = ? AND user_id = ?",
+        [title, due_date, userId],
+        (error, results) => {
           if (error) {
             return reject(error);
           }
@@ -125,12 +128,34 @@ const getTaskStatusById = async (taskId, userId) => {
   }
 };
 
-const updateTask = async (title, description, taskId, userId) => {
+// const updateTask = async (dataset, taskId, userId) => {
+//   try {
+
+//     const data = await new Promise((resolve, reject) => {
+//       db.query(
+//         "UPDATE tasks SET ? WHERE ID = ? and USER_ID=?",
+//         [dataset, taskId, userId],
+//         (error, result) => {
+//           if (error) {
+//             return reject(error);
+//           }
+//           resolve(result);
+//         }
+//       );
+//     });
+
+//     return data;
+//   } catch (error) {
+//     throw error;
+//   }
+// };
+
+const updateTask = async (dataset, taskId, userId) => {
   try {
     const data = await new Promise((resolve, reject) => {
       db.query(
-        "UPDATE tasks SET TITLE = ? or DESCRIPTION = ? WHERE ID = ? and USER_ID=?",
-        [title, description, taskId, userId],
+        "UPDATE tasks SET ? WHERE ID = ? AND USER_ID = ?",
+        [dataset, taskId, userId],
         (error, result) => {
           if (error) {
             return reject(error);
@@ -140,12 +165,11 @@ const updateTask = async (title, description, taskId, userId) => {
       );
     });
 
-    return data;
+    return data; 
   } catch (error) {
     throw error;
   }
 };
-
 
 
 // **********************************************************************
@@ -221,12 +245,12 @@ const getSortedTasks = async (sortField, sortOrder, userId) => {
 
 // *******************************************************************************
 
-const getSearchedTasks = async (userId, column, keyword) => {
+const getSearchedTasks = async (userId, keyword) => {
   try {
     const data = await new Promise((resolve, reject) => {
       db.query(
-        `SELECT * FROM tasks WHERE IS_DELETED=FALSE AND USER_ID=? AND ?? LIKE '%${keyword}%'`,
-        [userId, column],
+        `SELECT * FROM tasks WHERE IS_DELETED = FALSE AND USER_ID = ? AND title LIKE '%${keyword}%' or description like '%${keyword}%'`,
+        [userId],
         (error, results) => {
           if (error) {
             return reject(error);
@@ -244,22 +268,18 @@ const getSearchedTasks = async (userId, column, keyword) => {
 
 // *****************************************************************************
 
-const getFilteredTasks = (column, keyword, status, dueDate, userId) => {
+const getFilteredTasks = (status, due_date, userId) => {
   try {
     return new Promise((resolve, reject) => {
         
       let query = `SELECT *FROM tasks WHERE IS_DELETED=FALSE AND USER_ID=?`;
 
-      if (column && keyword) {
-        query += ` AND ${column} LIKE '%${keyword}%'`;
-      }
-
       if (status) {       
         query += ` AND status = '${status}'`;
       }
 
-      if (dueDate) {
-        query += ` AND STATUS='INCOMPLETE' AND due_date < CURDATE()`;
+      if (due_date) {
+        query += ` AND status='incomplete' AND due_date < CURDATE()`;
       }
 
       db.query(query, [userId], (error, data) => {
@@ -286,6 +306,7 @@ module.exports = {
   createNewTask,
   getTaskStatusById,
   updateTask,
+  
   deleteTask,
   getSortedTasks,
   getSearchedTasks,

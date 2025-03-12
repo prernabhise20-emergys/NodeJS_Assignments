@@ -6,29 +6,25 @@ import cors from 'cors'
 import helmet from 'helmet';
 dotenv.config();
 
-const {
-  env: { PORT },
-} = process;
-
 const app = express();
 app.use(helmet());
-app.use(cors())
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 
-app.use("/api/user", userRoutes);
-app.use("/api/patient", patientRoutes);
+app.use("/api/user", userRoutes).use("/api/patient", patientRoutes);
 
 const corsOptions = {
   origin: "*",
-  methods: "GET, POST, PUT,PATCH, DELETE",
+  methods: "GET, POST, PUT, DELETE",
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 };
 
 app.use(cors(corsOptions));
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+const { env: { PORT }, } = process;
+const port = PORT || 3000;
 
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});

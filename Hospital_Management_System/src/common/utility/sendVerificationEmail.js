@@ -1,4 +1,4 @@
-import transporter from '../config/emailConfig.js';
+import transporter from '../../config/emailConfig.js';
 
 const sendVerificationEmail = async (toEmail) => {
   try {
@@ -18,9 +18,6 @@ const sendVerificationEmail = async (toEmail) => {
             <p style="font-size: 16px; color: #555;">
               <strong>Verification Instructions:</strong><br>
               Please click on the link below to verify your email address and complete your registration process.
-            </p>
-            <p style="text-align: center;">
-              <a href="#" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Verify Email</a>
             </p>
             <p style="font-size: 14px; color: #888; text-align: center;">
               If you did not sign up for this account, please disregard this email.

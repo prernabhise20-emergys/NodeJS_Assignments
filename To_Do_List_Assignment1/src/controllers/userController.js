@@ -46,9 +46,9 @@ const login = async (req, res) => {
         message: MESSAGE.INVALID_USER_MESSAGE,
       });
     }
-    console.log('Plain password:', password);
-    console.log('Hashed password from DB:', user.password);
-    const match = await bcrypt.compare(password, user.password); 
+    console.log("Plain password:", password);
+    console.log("Hashed password from DB:", user.password);
+    const match = await bcrypt.compare(password, user.password);
 
     if (!match) {
       return res.status(STATUS_CODE.INVALID).json({
