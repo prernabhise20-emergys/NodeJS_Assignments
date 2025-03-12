@@ -26,6 +26,8 @@ const SUCCESS_MESSAGE = {
     FILTER_TASK_MESSAGE:"Task is filtered successfully",
     TASK_ALREADY_COMPLETED:"Task already completed",
     TASK_SEARCHING_MESSAGE:"Task searching successfully",
+    LOGIN_SUCCESS_MESSAGE: 'Login successfully',
+
 }
 
 const ERROR_MESSAGE={
@@ -44,7 +46,6 @@ const ERROR_MESSAGE={
     INVALID_COLUMN_MESSAGE: "Invalid column name. Use 'title' or 'description",
     MISSING_KEYWORD_MESSAGE: "Keyword is required for searching",
     REGISTER_SUCCESS_MESSAGE: "User registered successfully",
-    LOGIN_SUCCESS_MESSAGE: 'Login successfully',
     FAILED_CHECK_MESSAGE: "Failed to check task in data",
     FAILED_CREATE_MESSAGE: "Failed to create task",
     DB_ERROR_MESSAGE: "Database operation failed",

@@ -1,5 +1,10 @@
 const taskModel = require("../models/taskModel");
-const { ERROR_STATUS_CODE ,SUCCESS_STATUS_CODE,SUCCESS_MESSAGE,ERROR_MESSAGE } = require("../constants/statusConstant");
+const {
+  ERROR_STATUS_CODE,
+  SUCCESS_STATUS_CODE,
+  SUCCESS_MESSAGE,
+  ERROR_MESSAGE,
+} = require("../constants/statusConstant");
 
 // ******************************************************************
 
@@ -16,8 +21,8 @@ const getAllTaskDetails = async (req, res) => {
   } catch (error) {
     console.error(error.message);
     return res.status(ERROR_STATUS_CODE.SERVER_ERROR).send({
-      status:ERROR_STATUS_CODE.SERVER_ERROR,
-      message: error.message ||MESSAGE.SERVER_ERROR_MESSAGE,
+      status: ERROR_STATUS_CODE.SERVER_ERROR,
+      message: error.message || MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -31,7 +36,7 @@ const getSpecificTaskDetails = async (req, res) => {
 
     const task = await taskModel.getSpecificTask(taskId, userId);
     if (!task.length) {
-      throw{
+      throw {
         status: ERROR_STATUS_CODE.NOT_FOUND,
         message: ERROR_MESSAGE.TASKNOT_FOUND_MESSAGE,
       };
@@ -43,8 +48,8 @@ const getSpecificTaskDetails = async (req, res) => {
     });
   } catch (error) {
     console.error(error.message);
-    return res.status(error.status|| ERROR_STATUS_CODE.SERVER_ERROR).send({
-      status:error.status|| ERROR_STATUS_CODE.SERVER_ERROR,
+    return res.status(error.status || ERROR_STATUS_CODE.SERVER_ERROR).send({
+      status: error.status || ERROR_STATUS_CODE.SERVER_ERROR,
     });
   }
 };
@@ -60,10 +65,14 @@ const createNewTask = async (req, res) => {
     const { id: USER_ID, email: EMAIL } = req.user;
 
     const taskData = { title, description, due_date };
-    const taskExists = await taskModel.checkIfTaskExists(title, due_date, USER_ID);
+    const taskExists = await taskModel.checkIfTaskExists(
+      title,
+      due_date,
+      USER_ID
+    );
 
     if (taskExists) {
-      throw{
+      throw {
         status: ERROR_STATUS_CODE.BAD_REQUEST,
         message: ERROR_MESSAGE.DUPLICATE_ERROR_MESSAGE,
       };
@@ -77,14 +86,12 @@ const createNewTask = async (req, res) => {
     });
   } catch (error) {
     console.error(error.message);
-    return res.status(error.status|| ERROR_STATUS_CODE.SERVER_ERROR).send({
-      status: error.status|| ERROR_STATUS_CODE.SERVER_ERROR,
-      message:error.message ||  ERROR_MESSAGE.SERVER_ERROR_MESSAGE,
+    return res.status(error.status || ERROR_STATUS_CODE.SERVER_ERROR).send({
+      status: error.status || ERROR_STATUS_CODE.SERVER_ERROR,
+      message: error.message || ERROR_MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
-
-
 
 // **************************************************************
 
@@ -94,9 +101,10 @@ const updateTask = async (req, res) => {
     const { id: taskId } = req.params;
     const { id: userId } = req.user;
 
+
     const taskStatus = await taskModel.getTaskStatusById(taskId, userId);
 
-    if (taskStatus === 'complete') {
+    if (taskStatus === "complete") {
       throw {
         status: ERROR_STATUS_CODE.FORBIDDEN,
         message: ERROR_MESSAGE.TASK_ALREADY_COMPLETED,
@@ -104,8 +112,8 @@ const updateTask = async (req, res) => {
     }
     const dataset = {};
 
-    if (title) dataset.title = title; 
-    if (description) dataset.description = description; 
+    if (title) dataset.title = title;
+    if (description) dataset.description = description;
     if (due_date) dataset.due_date = due_date;
 
     if (Object.keys(dataset).length === 0) {
@@ -115,7 +123,11 @@ const updateTask = async (req, res) => {
       };
     }
 
-    const updateTaskResult = await taskModel.updateTask(dataset, taskId, userId);
+    const updateTaskResult = await taskModel.updateTask(
+      dataset,
+      taskId,
+      userId
+    );
 
     if (!updateTaskResult) {
       throw {
@@ -137,7 +149,6 @@ const updateTask = async (req, res) => {
   }
 };
 
-
 // ********************************************************************
 
 const updateStatus = async (req, res) => {
@@ -152,8 +163,8 @@ const updateStatus = async (req, res) => {
       userId
     );
 
-    if (updateStatusResult) {
-      throw{
+    if (!updateStatusResult) {
+      throw {
         status: ERROR_STATUS_CODE.NOT_FOUND,
         message: ERROR_MESSAGE.TASK_STATUSNOT_UPDATED_MESSAGE,
       };
@@ -165,8 +176,8 @@ const updateStatus = async (req, res) => {
   } catch (error) {
     console.error(error.message);
 
-    return res.status(error.status||ERROR_STATUS_CODE.SERVER_ERROR).send({
-      status: error.status||ERROR_STATUS_CODE.SERVER_ERROR,
+    return res.status(error.status || ERROR_STATUS_CODE.SERVER_ERROR).send({
+      status: error.status || ERROR_STATUS_CODE.SERVER_ERROR,
       message: error.message || ERROR_MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
@@ -182,7 +193,7 @@ const deleteTask = async (req, res) => {
     const deleteTask = await taskModel.deleteTask(taskId, userId);
 
     if (deleteTask) {
-      throw{
+      throw {
         status: ERROR_STATUS_CODE.NOT_FOUND,
         message: ERROR_MESSAGE.NOT_DELETE_MESSAGE,
       };
@@ -194,9 +205,9 @@ const deleteTask = async (req, res) => {
   } catch (error) {
     console.error(error.message);
 
-    return res.status(error.status||ERROR_STATUS_CODE.SERVER_ERROR).send({
-      status:error.status|| ERROR_STATUS_CODE.SERVER_ERROR,
-      message:error.message|| ERROR_MESSAGE.SERVER_ERROR_MESSAGE,
+    return res.status(error.status || ERROR_STATUS_CODE.SERVER_ERROR).send({
+      status: error.status || ERROR_STATUS_CODE.SERVER_ERROR,
+      message: error.message || ERROR_MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -205,9 +216,9 @@ const deleteTask = async (req, res) => {
 
 const sortingTask = async (req, res) => {
   try {
-    const { column="created_date", sortByOrder='desc' } = req.params;
+    const { column = "created_date", sortByOrder = "desc" } = req.params;
     const { id: userId } = req.user;
-  
+
     const tasks = await taskModel.getSortedTasks(column, sortByOrder, userId);
 
     return res.status(SUCCESS_STATUS_CODE.SUCCESS).send({
@@ -219,8 +230,8 @@ const sortingTask = async (req, res) => {
     console.error(error.message);
 
     return res.status(ERROR_STATUS_CODE.SERVER_ERROR).send({
-      status: error.status||ERROR_STATUS_CODE.SERVER_ERROR,
-      message:error.message ||  ERROR_MESSAGE.SERVER_ERROR_MESSAGE,
+      status: error.status || ERROR_STATUS_CODE.SERVER_ERROR,
+      message: error.message || ERROR_MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -229,18 +240,18 @@ const sortingTask = async (req, res) => {
 
 const searchTasks = async (req, res) => {
   try {
-    const {keyword } = req.params;
+    const { keyword } = req.params;
     const { id: userId } = req.user;
 
     if (!keyword) {
-      throw{
+      throw {
         status: ERROR_STATUS_CODE.BAD_REQUEST,
         message: ERROR_MESSAGE.MISSING_KEYWORD_MESSAGE,
       };
     }
     const tasks = await taskModel.getSearchedTasks(userId, keyword);
     if (!tasks.length) {
-      throw{
+      throw {
         status: ERROR_STATUS_CODE.NOT_FOUND,
         message: ERROR_MESSAGE.TASKNOT_FOUND_MESSAGE,
       };
@@ -267,13 +278,9 @@ const filterTasks = async (req, res) => {
   try {
     const { id: userId } = req.user;
 
-    const {status, due_date } = req.query;
+    const { status, due_date } = req.query;
 
-    const tasks = await taskModel.getFilteredTasks(
-      status,
-      due_date,
-      userId
-    );
+    const tasks = await taskModel.getFilteredTasks(status, due_date, userId);
     return res.status(SUCCESS_STATUS_CODE.SUCCESS).send({
       status: SUCCESS_STATUS_CODE.SUCCESS,
       message: SUCCESS_MESSAGE.FILTER_TASK_MESSAGE,
@@ -302,4 +309,3 @@ module.exports = {
   updateStatus,
   filterTasks,
 };
-
