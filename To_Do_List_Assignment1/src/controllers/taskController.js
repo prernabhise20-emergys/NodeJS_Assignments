@@ -50,6 +50,7 @@ const getSpecificTaskDetails = async (req, res) => {
     console.error(error.message);
     return res.status(error.status || ERROR_STATUS_CODE.SERVER_ERROR).send({
       status: error.status || ERROR_STATUS_CODE.SERVER_ERROR,
+      message: error.message || ERROR_MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -101,7 +102,6 @@ const updateTask = async (req, res) => {
     const { id: taskId } = req.params;
     const { id: userId } = req.user;
 
-
     const taskStatus = await taskModel.getTaskStatusById(taskId, userId);
 
     if (taskStatus === "complete") {
@@ -110,14 +110,29 @@ const updateTask = async (req, res) => {
         message: ERROR_MESSAGE.TASK_ALREADY_COMPLETED,
       };
     }
-    const dataset = {};
 
-    if (title) dataset.title = title;
-    if (description) dataset.description = description;
-    if (due_date) dataset.due_date = due_date;
+    const taskExists = await taskModel.checkIfTaskExists(
+      title,
+      due_date,
+      userId
+    );
+
+    if (taskExists) {
+      throw {
+        status: ERROR_STATUS_CODE.BAD_REQUEST,
+        message: ERROR_MESSAGE.DUPLICATE_ERROR_MESSAGE,
+      };
+    }
+    // const dataset = {};
+
+    // if (title) dataset.title = title;
+    // if (description) dataset.description = description;
+    // if (due_date) dataset.due_date = due_date;
 
     const updateTaskResult = await taskModel.updateTask(
-      dataset,
+      title,
+      description,
+      due_date,
       taskId,
       userId
     );
@@ -156,7 +171,7 @@ const updateStatus = async (req, res) => {
       userId
     );
 
-    if (!updateStatusResult) {
+    if (updateStatusResult) {
       throw {
         status: ERROR_STATUS_CODE.NOT_FOUND,
         message: ERROR_MESSAGE.TASK_STATUSNOT_UPDATED_MESSAGE,
@@ -258,9 +273,9 @@ const searchTasks = async (req, res) => {
   } catch (error) {
     console.error(error.message);
 
-    return res.status(ERROR_STATUS_CODE.SERVER_ERROR).send({
-      status: ERROR_STATUS_CODE.SERVER_ERROR,
-      message: ERROR_MESSAGE.SERVER_ERROR_MESSAGE,
+    return res.status(error.status || ERROR_STATUS_CODE.SERVER_ERROR).send({
+      status: error.status || ERROR_STATUS_CODE.SERVER_ERROR,
+      message: error.message || ERROR_MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -271,9 +286,13 @@ const filterTasks = async (req, res) => {
   try {
     const { id: userId } = req.user;
 
-    const { status, due_date } = req.query;
+    const { status, over_dues_date } = req.query;
 
-    const tasks = await taskModel.getFilteredTasks(status, due_date, userId);
+    const tasks = await taskModel.getFilteredTasks(
+      status,
+      over_dues_date,
+      userId
+    );
     return res.status(SUCCESS_STATUS_CODE.SUCCESS).send({
       status: SUCCESS_STATUS_CODE.SUCCESS,
       message: SUCCESS_MESSAGE.FILTER_TASK_MESSAGE,
@@ -302,5 +321,3 @@ module.exports = {
   updateStatus,
   filterTasks,
 };
-
-

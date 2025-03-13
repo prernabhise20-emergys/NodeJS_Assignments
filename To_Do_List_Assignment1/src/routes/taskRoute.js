@@ -11,8 +11,8 @@ router.get('/getSpecificTask/:id', authenticateUser, taskController.getSpecificT
 router.post('/createTask', authenticateUser, bodyValidator(createTaskSchema), taskController.createNewTask);
 router.put('/updateTask/:id', authenticateUser, bodyValidator(updateTaskSchema), taskController.updateTask);
 router.delete('/deleteTask/:id', authenticateUser, taskController.deleteTask);
-router.get('/tasks/:column/:sortByOrder', authenticateUser, taskController.sortingTask);
-router.get('/taskssearch/:keyword', authenticateUser, taskController.searchTasks);
+router.get('/sortTask/:column/:sortByOrder', authenticateUser, taskController.sortingTask);
+router.get('/searchTask/:keyword', authenticateUser, taskController.searchTasks);
 router.patch('/updateStatus/:id', authenticateUser, bodyValidator(updateStatusSchema), taskController.updateStatus);
 router.get('/filterTasks', authenticateUser, taskController.filterTasks);
 

@@ -1,9 +1,11 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const {  ERROR_STATUS_CODE,
+const {
+  ERROR_STATUS_CODE,
   SUCCESS_STATUS_CODE,
   SUCCESS_MESSAGE,
-  ERROR_MESSAGE, } = require("../constants/statusConstant");
+  ERROR_MESSAGE,
+} = require("../constants/statusConstant");
 const userModel = require("../models/userModel");
 require("dotenv").config();
 
@@ -13,7 +15,7 @@ const register = async (req, res) => {
 
     const userExists = await userModel.checkIfUserExists(email);
     if (userExists) {
-      throw{
+      throw {
         status: ERROR_STATUS_CODE.BAD_REQUEST,
         message: ERROR_MESSAGE.DUPLICATE_USER_MESSAGE,
       };
@@ -28,8 +30,8 @@ const register = async (req, res) => {
   } catch (error) {
     console.error(error.message);
 
-    res.status(error.status|| ERROR_STATUS_CODE.SERVER_ERROR).json({
-      status:error.status ||  ERROR_STATUS_CODE.SERVER_ERROR,
+    res.status(error.status || ERROR_STATUS_CODE.SERVER_ERROR).json({
+      status: error.status || ERROR_STATUS_CODE.SERVER_ERROR,
       message: error.message || ERROR_MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
@@ -43,7 +45,7 @@ const login = async (req, res) => {
     const user = await userModel.login(username);
 
     if (!user) {
-      throw{
+      throw {
         status: ERROR_STATUS_CODE.INVALID,
         message: ERROR_MESSAGE.INVALID_USER_MESSAGE,
       };
@@ -53,7 +55,7 @@ const login = async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
 
     if (!match) {
-     throw{
+      throw {
         status: ERROR_STATUS_CODE.INVALID,
         message: ERROR_MESSAGE.INVALID_USER_MESSAGE,
       };
@@ -68,9 +70,9 @@ const login = async (req, res) => {
     res.json({ message: SUCCESS_MESSAGE.LOGIN_SUCCESS_MESSAGE, token });
   } catch (error) {
     console.error(error.message);
-    res.status(error.status||ERROR_STATUS_CODE.SERVER_ERROR).json({
-      status:error.status|| ERROR_STATUS_CODE.SERVER_ERROR,
-      message:error.message || ERROR_MESSAGE.SERVER_ERROR_MESSAGE,
+    res.status(error.status || ERROR_STATUS_CODE.SERVER_ERROR).json({
+      status: error.status || ERROR_STATUS_CODE.SERVER_ERROR,
+      message: error.message || ERROR_MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -84,7 +86,7 @@ const updateUser = async (req, res) => {
     const userExists = await userModel.checkIfUserExists(formData.email);
 
     if (!userExists) {
-      throw{
+      throw {
         status: ERROR_STATUS_CODE.SERVER_ERROR,
         message: ERROR_MESSAGE.INVALID_USER_MESSAGE,
       };
@@ -101,9 +103,9 @@ const updateUser = async (req, res) => {
     });
   } catch (error) {
     console.error(error.message);
-    return res.status(error.status||ERROR_STATUS_CODE.SERVER_ERROR).send({
-      status: error.status||ERROR_STATUS_CODE.SERVER_ERROR,
-      message:error.message|| ERROR_MESSAGE.SERVER_ERROR_MESSAGE,
+    return res.status(error.status || ERROR_STATUS_CODE.SERVER_ERROR).send({
+      status: error.status || ERROR_STATUS_CODE.SERVER_ERROR,
+      message: error.message || ERROR_MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -122,9 +124,9 @@ const getUser = async (req, res) => {
     });
   } catch (error) {
     console.error(error.message);
-    return res.status(error.status||ERROR_STATUS_CODE.SERVER_ERROR).send({
-      status: error.status||ERROR_STATUS_CODE.SERVER_ERROR,
-      message: error.message ||ERROR_MESSAGE.SERVER_ERROR_MESSAGE,
+    return res.status(error.status || ERROR_STATUS_CODE.SERVER_ERROR).send({
+      status: error.status || ERROR_STATUS_CODE.SERVER_ERROR,
+      message: error.message || ERROR_MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -144,9 +146,9 @@ const deleteUser = async (req, res) => {
     });
   } catch (error) {
     console.error(error.message);
-    return res.status(error.status||ERROR_STATUS_CODE.SERVER_ERROR).send({
-      status: error.status||ERROR_STATUS_CODE.SERVER_ERROR,
-      message:error.message ||  MESSAGE.SERVER_ERROR_MESSAGE,
+    return res.status(error.status || ERROR_STATUS_CODE.SERVER_ERROR).send({
+      status: error.status || ERROR_STATUS_CODE.SERVER_ERROR,
+      message: error.message || MESSAGE.SERVER_ERROR_MESSAGE,
     });
   }
 };

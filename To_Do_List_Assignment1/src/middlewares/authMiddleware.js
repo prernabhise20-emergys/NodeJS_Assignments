@@ -1,6 +1,9 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-const { MESSAGE, STATUS_CODE } = require("../constants/statusConstant")
+const { ERROR_STATUS_CODE,
+    SUCCESS_STATUS_CODE,
+    SUCCESS_MESSAGE,
+    ERROR_MESSAGE, } = require("../constants/statusConstant")
 
 
 const authenticateUser = (req, res, next) => {
@@ -9,9 +12,9 @@ const authenticateUser = (req, res, next) => {
         const token = req.header("Authorization")
 
         if (!token) {
-            return res.status(STATUS_CODE .INVALID).json({
-                status: STATUS_CODE .INVALID,
-                message:  MESSAGE.INVALID_TOKEN_MESSAGE
+            return res.status(ERROR_STATUS_CODE .INVALID).json({
+                status: ERROR_STATUS_CODE .INVALID,
+                message:  ERROR_MESSAGE.INVALID_TOKEN_MESSAGE
             });
         }
 
@@ -19,9 +22,9 @@ const authenticateUser = (req, res, next) => {
 
         if (!decoded) {
             if (err) {
-                return res.status(STATUS_CODE.FORBIDDEN).json({
-                    status: STATUS_CODE.FORBIDDEN,
-                    message:  MESSAGE.FORBIDDEN_ERROR_MESSAGE
+                return res.status(ERROR_STATUS_CODE.FORBIDDEN).json({
+                    status: ERROR_STATUS_CODE.FORBIDDEN,
+                    message:  ERROR_MESSAGE.FORBIDDEN_ERROR_MESSAGE
                 });
             }
         }
@@ -32,9 +35,9 @@ const authenticateUser = (req, res, next) => {
         next();
     }
     catch (error) {
-        res.status( STATUS_CODE.INVALID).json({
-            status:  STATUS_CODE.INVALID,
-            message:  MESSAGE.INVALID_TOKEN_MESSAGE
+        res.status( ERROR_STATUS_CODE.INVALID).json({
+            status:  ERROR_STATUS_CODE.INVALID,
+            message:  ERROR_MESSAGE.INVALID_TOKEN_MESSAGE
         });
     }
 };

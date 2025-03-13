@@ -108,13 +108,16 @@ const getTaskStatusById = async (taskId, userId) => {
   }
 };
 
+// *******************************************************************
 
-const updateTask = async (dataset, taskId, userId) => {
+const updateTask = async (title, description, due_date, taskId, userId) => {
   try {
     const data = await new Promise((resolve, reject) => {
+      console.log(title, description, due_date);
+      
       db.query(
-        "UPDATE tasks SET ? WHERE ID = ? AND USER_ID = ?",
-        [dataset, taskId, userId],
+        "UPDATE tasks SET title=?, description=?, due_date=? WHERE ID = ? AND USER_ID = ?",
+        [title, description, due_date, taskId, userId],
         (error, result) => {
           if (error) {
             return reject(error);
@@ -129,7 +132,6 @@ const updateTask = async (dataset, taskId, userId) => {
     throw error;
   }
 };
-
 
 // **********************************************************************
 
@@ -227,17 +229,17 @@ const getSearchedTasks = async (userId, keyword) => {
 
 // *****************************************************************************
 
-const getFilteredTasks = (status, due_date, userId) => {
+const getFilteredTasks = (status, over_dues_date , userId) => {
   try {
     return new Promise((resolve, reject) => {
         
-      let query = `SELECT *FROM tasks WHERE IS_DELETED=FALSE AND USER_ID=?`;
+      let query = `SELECT * FROM tasks WHERE IS_DELETED=FALSE AND USER_ID=?`;
 
       if (status) {       
         query += ` AND status = '${status}'`;
       }
 
-      if (due_date) {
+      if (over_dues_date ) {
         query += ` AND status='incomplete' AND due_date < CURDATE()`;
       }
 
