@@ -225,7 +225,7 @@ const getSearchedTasks = async (userId, keyword) => {
   try {
     const data = await new Promise((resolve, reject) => {
       db.query(
-        `SELECT id,title,description,due_date FROM tasks WHERE IS_DELETED = FALSE AND USER_ID = ? AND title LIKE '%${keyword}%' or description like '%${keyword}%'`,
+        `SELECT id,title,description,due_date,status FROM tasks WHERE IS_DELETED = FALSE AND USER_ID = ? AND title LIKE '%${keyword}%' or description like '%${keyword}%'`,
         [userId],
         (error, results) => {
           if (error) {
