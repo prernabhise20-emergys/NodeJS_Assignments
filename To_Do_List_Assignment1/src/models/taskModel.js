@@ -6,7 +6,7 @@ const getTasks = async (userId) => {
   try {
     const data = await new Promise((resolve, reject) => {
       db.query(
-        "SELECT id,title,description,due_Date FROM tasks WHERE IS_DELETED = FALSE AND USER_ID = ? ORDER BY id DESC",
+        "SELECT id,title,description,due_date, status FROM tasks WHERE IS_DELETED = FALSE AND USER_ID = ? ORDER BY id DESC",
         userId,
         (error, result) => {
           if (error) return reject(error);
