@@ -167,7 +167,7 @@ const updateStatus = async (req, res) => {
       userId
     );
 
-    if (updateStatusResult) {
+    if (!updateStatusResult) {
       throw {
         status: ERROR_STATUS_CODE.NOT_FOUND,
         message: ERROR_MESSAGE.TASK_STATUSNOT_UPDATED_MESSAGE,
