@@ -116,7 +116,6 @@ const updateTask = async (req, res) => {
     if (description) dataset.description = description;
     if (due_date) dataset.due_date = due_date;
 
-
     const updateTaskResult = await taskModel.updateTask(
       dataset,
       taskId,
