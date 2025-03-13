@@ -282,9 +282,9 @@ const filterTasks = async (req, res) => {
   try {
     const { id: userId } = req.user;
 
-    const { status, overDues } = req.query;
+    const { status, due_date } = req.query;
 
-    const tasks = await taskModel.getFilteredTasks(status, overDues, userId);
+    const tasks = await taskModel.getFilteredTasks(status, due_date, userId);
     return res.status(SUCCESS_STATUS_CODE.SUCCESS).send({
       status: SUCCESS_STATUS_CODE.SUCCESS,
       message: SUCCESS_MESSAGE.FILTER_TASK_MESSAGE,

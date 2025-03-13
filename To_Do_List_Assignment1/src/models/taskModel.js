@@ -248,7 +248,7 @@ const getSearchedTasks = async (userId, keyword) => {
 
 // *****************************************************************************
 
-const getFilteredTasks = (status, overDues , userId) => {
+const getFilteredTasks = (status, due_date , userId) => {
   try {
     return new Promise((resolve, reject) => {
         
@@ -258,7 +258,7 @@ const getFilteredTasks = (status, overDues , userId) => {
         query += ` AND status = '${status}'`;
       }
 
-      if (overDues ) {
+      if (due_date ) {
         query += ` AND status='incomplete' AND due_date < CURDATE()`;
       }
 
