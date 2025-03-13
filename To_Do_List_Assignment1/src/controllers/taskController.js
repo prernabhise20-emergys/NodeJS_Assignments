@@ -126,7 +126,9 @@ const updateTask = async (req, res) => {
     }
 
     const updateTaskResult = await taskModel.updateTask(
-      title, description, due_date,
+      title,
+      description,
+      due_date,
       taskId,
       userId
     );
@@ -280,13 +282,9 @@ const filterTasks = async (req, res) => {
   try {
     const { id: userId } = req.user;
 
-    const { status, over_dues_date } = req.query;
+    const { status, overDues } = req.query;
 
-    const tasks = await taskModel.getFilteredTasks(
-      status,
-      over_dues_date,
-      userId
-    );
+    const tasks = await taskModel.getFilteredTasks(status, overDues, userId);
     return res.status(SUCCESS_STATUS_CODE.SUCCESS).send({
       status: SUCCESS_STATUS_CODE.SUCCESS,
       message: SUCCESS_MESSAGE.FILTER_TASK_MESSAGE,
