@@ -220,13 +220,21 @@ const getSortedTasks = async (sortField, sortOrder, userId) => {
 };
 
 // *******************************************************************************
-
 const getSearchedTasks = async (userId, keyword) => {
   try {
     const data = await new Promise((resolve, reject) => {
       db.query(
-        `SELECT id,title,description,due_date,status FROM tasks WHERE IS_DELETED = FALSE AND USER_ID = ? AND title LIKE '%${keyword}%' or description like '%${keyword}%'`,
-        [userId],
+        `SELECT id, title, description, due_date, status,
+        CASE
+          WHEN status = 'completed' THEN 'completed'
+          WHEN due_date < CURDATE() THEN 'overdue'
+          ELSE 'incomplete'
+        END AS task_status
+        FROM tasks
+        WHERE IS_DELETED = FALSE
+        AND USER_ID = ?
+        AND (title LIKE ? OR description LIKE ?)`,
+        [userId, `%${keyword}%`, `%${keyword}%`],
         (error, results) => {
           if (error) {
             return reject(error);
@@ -241,6 +249,7 @@ const getSearchedTasks = async (userId, keyword) => {
     throw error;
   }
 };
+
 
 // *****************************************************************************
 
