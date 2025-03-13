@@ -111,8 +111,9 @@ const updateTask = async (req, res) => {
       };
     }
 
-    const taskExists = await taskModel.checkIfTaskExists(
+    const taskExists = await taskModel.checkIsDuplicate(
       title,
+      description,
       due_date,
       userId
     );
@@ -123,16 +124,9 @@ const updateTask = async (req, res) => {
         message: ERROR_MESSAGE.DUPLICATE_ERROR_MESSAGE,
       };
     }
-    // const dataset = {};
-
-    // if (title) dataset.title = title;
-    // if (description) dataset.description = description;
-    // if (due_date) dataset.due_date = due_date;
 
     const updateTaskResult = await taskModel.updateTask(
-      title,
-      description,
-      due_date,
+      title, description, due_date,
       taskId,
       userId
     );
