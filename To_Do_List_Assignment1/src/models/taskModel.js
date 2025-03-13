@@ -27,7 +27,7 @@ const getSpecificTask = async (taskId, userId) => {
   try {
     const data = await new Promise((resolve, reject) => {
       db.query(
-        "SELECT id,title,description,due_Date FROM TASKS WHERE IS_DELETED=FALSE AND ID=? and USER_ID=?",
+        "SELECT id,title,description,due_date FROM TASKS WHERE IS_DELETED=FALSE AND ID=? and USER_ID=?",
         [taskId, userId],
         (err, result) => {
           if (err) return reject(err);
@@ -207,7 +207,7 @@ const getSortedTasks = async (sortField, sortOrder, userId) => {
   try {
     const data = await new Promise((resolve, reject) => {
       db.query(
-        `SELECT id,title,description,due_Date FROM tasks WHERE IS_DELETED=FALSE AND USER_ID=? ORDER BY ?? ${sortOrder}`,
+        `SELECT id,title,description,due_date FROM tasks WHERE IS_DELETED=FALSE AND USER_ID=? ORDER BY ?? ${sortOrder}`,
         [userId, sortField],
         (error, results) => {
           if (error) {
@@ -229,7 +229,7 @@ const getSearchedTasks = async (userId, keyword) => {
   try {
     const data = await new Promise((resolve, reject) => {
       db.query(
-        `SELECT id,title,description,due_Date FROM tasks WHERE IS_DELETED = FALSE AND USER_ID = ? AND title LIKE '%${keyword}%' or description like '%${keyword}%'`,
+        `SELECT id,title,description,due_date FROM tasks WHERE IS_DELETED = FALSE AND USER_ID = ? AND title LIKE '%${keyword}%' or description like '%${keyword}%'`,
         [userId],
         (error, results) => {
           if (error) {
@@ -252,7 +252,7 @@ const getFilteredTasks = (status, overDues , userId) => {
   try {
     return new Promise((resolve, reject) => {
         
-      let query = `SELECT id,title,description,due_Date,status FROM tasks WHERE IS_DELETED=FALSE AND USER_ID=?`;
+      let query = `SELECT id,title,description,due_date,status FROM tasks WHERE IS_DELETED=FALSE AND USER_ID=?`;
 
       if (status) {       
         query += ` AND status = '${status}'`;
