@@ -46,9 +46,8 @@ const getSpecificTask = async (taskId, userId) => {
 const checkIfTaskExists = async (title, due_date, userId) => {
   try {
     const result = await new Promise((resolve, reject) => {
-      
       db.query(
-        "SELECT title,due_Date FROM tasks WHERE title = ? AND due_date = ? AND user_id = ?",
+        "SELECT title,due_date FROM tasks WHERE title = ? AND due_date = ? AND user_id = ?",
         [title, due_date, userId],
         (error, results) => {
           if (error) {
@@ -64,10 +63,9 @@ const checkIfTaskExists = async (title, due_date, userId) => {
     throw error;
   }
 };
-const checkIsDuplicate = async (title,description, due_date, userId) => {
+const checkIsDuplicate = async (title, description, due_date, userId) => {
   try {
     const result = await new Promise((resolve, reject) => {
-      
       db.query(
         "SELECT title,description,due_date FROM tasks WHERE title =? and  description=? and due_date =? AND user_id = ?",
         [title, description, due_date, userId],
@@ -108,14 +106,13 @@ const createNewTask = async (data, userId, email) => {
   }
 };
 
-
 // ******************************************************************
 
 const getTaskStatusById = async (taskId, userId) => {
   try {
     return new Promise((resolve, reject) => {
       const query = "SELECT STATUS FROM TASKS WHERE ID = ? AND USER_ID = ?";
-      
+
       db.query(query, [taskId, userId], (error, result) => {
         if (error) {
           return reject(error);
@@ -133,7 +130,6 @@ const getTaskStatusById = async (taskId, userId) => {
 const updateTask = async (title, description, due_date, taskId, userId) => {
   try {
     const data = await new Promise((resolve, reject) => {
-      
       db.query(
         "UPDATE tasks SET title=?, description=?,due_date=? WHERE ID = ? AND USER_ID = ?",
         [title, description, due_date, taskId, userId],
@@ -146,7 +142,7 @@ const updateTask = async (title, description, due_date, taskId, userId) => {
       );
     });
 
-    return data; 
+    return data;
   } catch (error) {
     throw error;
   }
@@ -248,23 +244,21 @@ const getSearchedTasks = async (userId, keyword) => {
 
 // *****************************************************************************
 
-const getFilteredTasks = (status, due_date , userId) => {
+const getFilteredTasks = (status, due_date, userId) => {
   try {
     return new Promise((resolve, reject) => {
-        
       let query = `SELECT id,title,description,due_date,status FROM tasks WHERE IS_DELETED=FALSE AND USER_ID=?`;
 
-      if (status) {       
+      if (status) {
         query += ` AND status = '${status}'`;
       }
 
-      if (due_date ) {
+      if (due_date) {
         query += ` AND status='incomplete' AND due_date < CURDATE()`;
       }
 
       db.query(query, [userId], (error, data) => {
         if (error) {
-            
           return reject(error);
         }
         resolve(data);
@@ -274,7 +268,6 @@ const getFilteredTasks = (status, due_date , userId) => {
     throw error;
   }
 };
-
 
 // *****************************************************************************
 
@@ -292,4 +285,3 @@ module.exports = {
   updateStatus,
   getFilteredTasks,
 };
-
