@@ -203,7 +203,7 @@ const getSortedTasks = async (sortField, sortOrder, userId) => {
   try {
     const data = await new Promise((resolve, reject) => {
       db.query(
-        `SELECT id,title,description,due_date FROM tasks WHERE IS_DELETED=FALSE AND USER_ID=? ORDER BY ?? ${sortOrder}`,
+        `SELECT id,title,description,due_date,status FROM tasks WHERE IS_DELETED=FALSE AND USER_ID=? ORDER BY ?? ${sortOrder}`,
         [userId, sortField],
         (error, results) => {
           if (error) {
